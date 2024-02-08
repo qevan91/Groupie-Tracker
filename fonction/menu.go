@@ -55,11 +55,3 @@ func SetupWindowAndRun(content fyne.CanvasObject) {
 	// Affiche la fenêtre et démarre l'application
 	w.ShowAndRun()
 }
-
-func main() {
-	// Crée les composants de l'interface utilisateur
-	content := CreateUIComponents()
-
-	// Configure la fenêtre et exécute l'application
-	SetupWindowAndRun(content)
-}
