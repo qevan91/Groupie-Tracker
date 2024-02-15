@@ -1,20 +1,29 @@
 package fonction
 
 import (
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
+	"fmt"
+	//"fyne.io/fyne/v2"
+	//"fyne.io/fyne/v2/container"
+	//"fyne.io/fyne/v2/app"
+	//"fyne.io/fyne/v2/widget"
 )
 
-func createSearchEntry() *widget.Entry {
-	// Crée un champ de texte pour la saisie de recherche
-	searchEntry := widget.NewEntry()
-	return searchEntry
+func Saucisse() {
+	fmt.Print("démarage")
 }
 
-func createSearchButton(searchEntry *widget.Entry) *widget.Button {
-	// Crée un bouton de recherche avec une fonction de callback
+/*
+func CreateUI() fyne.Window {
+	// Crée une nouvelle instance de l'application Fyne
+	a := app.New()
+
+	// Crée une nouvelle fenêtre avec le titre "Hello"
+	w := a.NewWindow("Hello")
+
+	// Crée un champ de texte pour la saisie de recherche
+	searchEntry := widget.NewEntry()
+
+	// Crée un bouton de recherche
 	searchButton := widget.NewButton("Recherche", func() {
 		// Récupère le terme de recherche saisi
 		searchTerm := searchEntry.Text
@@ -25,13 +34,6 @@ func createSearchButton(searchEntry *widget.Entry) *widget.Button {
 			Content: "Vous avez cherché : " + searchTerm,
 		})
 	})
-	return searchButton
-}
-
-func CreateUIComponents() fyne.CanvasObject {
-	// Crée les composants de l'interface utilisateur
-	searchEntry := createSearchEntry()
-	searchButton := createSearchButton(searchEntry)
 
 	// Crée un conteneur pour organiser les éléments de l'interface utilisateur
 	content := container.NewVBox(
@@ -39,19 +41,17 @@ func CreateUIComponents() fyne.CanvasObject {
 		searchEntry,
 		searchButton,
 	)
-	return content
-}
-
-func SetupWindowAndRun(content fyne.CanvasObject) {
-	// Crée une nouvelle instance de l'application Fyne
-	myApp := app.New()
-
-	// Crée une nouvelle fenêtre avec le titre "Hello"
-	w := myApp.NewWindow("Hello")
 
 	// Définit le contenu de la fenêtre
 	w.SetContent(content)
 
-	// Affiche la fenêtre et démarre l'application
+	return w
+}
+
+func Test() {
+	a := app.New()
+	w := a.NewWindow("Hello")
+
 	w.ShowAndRun()
 }
+*/
