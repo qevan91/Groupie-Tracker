@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // Artist représente la structure des données d'un artiste
@@ -18,8 +18,8 @@ type Artist struct {
 	Image        string   `json:"image"`
 	Name         string   `json:"name"`
 	Members      []string `json:"members"`
-	CreationDate int      `json:"creation_date"`
-	FirstAlbum   string   `json:"first_album"`
+	CreationDate int      `json:"creationDate"`
+	FirstAlbum   string   `json:"firstAlbum"`
 	Locations    string   `json:"locations"`
 	ConcertDates string   `json:"concert_dates"`
 	Relation     string   `json:"relations"`
@@ -29,16 +29,17 @@ func main() {
 	a := app.New()
 	w := a.NewWindow("Artist Details")
 
+	w.Resize(fyne.NewSize(1000, 500))
+
+	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
+		w.MainMenu()
+	})
+
 	searchEntry := widget.NewEntry()
 
 	searchButton := widget.NewButton("Recherche", func() {
 		searchTerm := searchEntry.Text
 		PerformPostJsonRequest(w, searchTerm)
-	})
-
-	// Set the minimum size of the Home button
-	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-		fmt.Println("tapped home")
 	})
 
 	content := container.NewVBox(
@@ -82,8 +83,7 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 	}
 
 	artistContainer := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("ID: %d", Artist.ID)),
-		widget.NewLabel(fmt.Sprintf("Image: %d", Artist.Image)),
+		widget.NewLabel(fmt.Sprintf("Image: %v", Artist.Image)),
 		widget.NewLabel(fmt.Sprintf("Name: %s", Artist.Name)),
 		widget.NewLabel(fmt.Sprintf("Members: %v", Artist.Members)),
 		widget.NewLabel(fmt.Sprintf("Creation Date: %d", Artist.CreationDate)),
@@ -94,7 +94,7 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 	)
 
 	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-		main()
+		w.MainMenu()
 	})
 
 	w.SetContent(container.NewVBox(
