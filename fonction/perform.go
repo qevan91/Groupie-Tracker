@@ -1,17 +1,15 @@
-package fonction
+package fonction // Indiquer que ce fichier appartient au package fonction
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"fyne.io/fyne"
-	//"fyne.io/fyne/app"
-
-	//"fyne.io/fyne/canvas"
-	"fyne.io/fyne/container"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 // Artist représente la structure des données d'un artiste
@@ -27,22 +25,26 @@ type Artist struct {
 	Relation     string   `json:"relations"`
 }
 
+// PerformPostJsonRequest est une fonction pour récupérer les détails d'un artiste
 func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
-
+	// URL de l'API pour récupérer les détails des artistes
 	const myurl = "https://groupietrackers.herokuapp.com/api/artists"
+
+	// Récupération des données depuis l'API
 	response, err := http.Get(myurl)
 	if err != nil {
 		panic(err)
 	}
-
 	defer response.Body.Close()
 
+	// Décodage des données JSON dans une structure d'artiste
 	var artists []Artist
 	err = json.NewDecoder(response.Body).Decode(&artists)
 	if err != nil {
 		panic(err)
 	}
 
+	// Recherche de l'artiste par son nom
 	var Artist *Artist
 	for _, artist := range artists {
 		if artist.Name == artistNAME {
@@ -51,29 +53,49 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 		}
 	}
 
+	// Vérification si l'artiste est trouvé
 	if Artist == nil {
-		fmt.Println("Artist not found")
+		fmt.Println("Artiste non trouvé")
 		return
 	}
 
-	artistContainer := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("Image: %v", Artist.Image)),
-		widget.NewLabel(fmt.Sprintf("Name: %s", Artist.Name)),
-		widget.NewLabel(fmt.Sprintf("Members: %v", Artist.Members)),
-		widget.NewLabel(fmt.Sprintf("Creation Date: %d", Artist.CreationDate)),
-		widget.NewLabel(fmt.Sprintf("First Album: %s", Artist.FirstAlbum)),
-		widget.NewLabel(fmt.Sprintf("Locations: %s", Artist.Locations)),
-		widget.NewLabel(fmt.Sprintf("Concert Dates: %s", Artist.ConcertDates)),
+	// Création du conteneur pour les détails de l'artiste
+	artistDetails := container.NewVBox(
+		widget.NewLabel(fmt.Sprintf("Nom: %s", Artist.Name)),
+		widget.NewLabel(fmt.Sprintf("Membres: %v", Artist.Members)),
+		widget.NewLabel(fmt.Sprintf("Date de création: %d", Artist.CreationDate)),
+		widget.NewLabel(fmt.Sprintf("Premier album: %s", Artist.FirstAlbum)),
+		widget.NewLabel(fmt.Sprintf("Lieux: %s", Artist.Locations)),
+		widget.NewLabel(fmt.Sprintf("Dates de concert: %s", Artist.ConcertDates)),
 		widget.NewLabel(fmt.Sprintf("Relation: %s", Artist.Relation)),
 	)
 
-	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
+	// Chargement de l'image depuis l'URL
+	imgResource, err := fyne.LoadResourceFromURLString(Artist.Image) // En supposant que Artist.Image contient l'URL de l'image
+	if err != nil {
+		panic(err)
+	}
+	img := canvas.NewImageFromResource(imgResource)
+
+	// Redimensionnement de l'image
+	img.SetMinSize(fyne.NewSize(150, 150))
+	img.FillMode = canvas.ImageFillContain
+
+	// Création du conteneur pour l'image et les détails de l'artiste
+	content := container.NewVBox(
+		img,           // L'image
+		artistDetails, // Les détails de l'artiste
+	)
+
+	// Bouton pour retourner à la page d'accueil
+	buttonHome := widget.NewButtonWithIcon("Accueil", theme.HomeIcon(), func() {
 		w.MainMenu()
 	})
 
+	// Définition du contenu de la fenêtre
 	w.SetContent(container.NewVBox(
 		buttonHome,
-		widget.NewLabel("Artist Details"),
-		artistContainer,
+		widget.NewLabel("Détails de l'artiste"),
+		content,
 	))
 }
