@@ -2,7 +2,7 @@ package search
 
 import (
 	"fmt"
-	"gpo/data"
+	"gpo/structs"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,7 +11,7 @@ import (
 )
 
 func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
-	artist, err := data.GetArtistByName(artistNAME)
+	artist, err := structs.GetArtistByName(artistNAME)
 	if err != nil {
 		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
 			w.MainMenu()
@@ -23,7 +23,7 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 			searchTerm := searchEntry.Text
 			PerformPostJsonRequest(w, searchTerm)
 		})
-		if err == data.ErrArtistNotFound {
+		if err == structs.ErrArtistNotFound {
 			w.SetContent(container.NewVBox(
 				buttonHome,
 				searchEntry,
@@ -44,14 +44,14 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 		})
 
 		artistContainer := container.NewVBox(
-			widget.NewLabel(fmt.Sprintf("Image: %v", data.GetImage())),
-			widget.NewLabel(fmt.Sprintf("Name: %s", data.GetName())),
-			widget.NewLabel(fmt.Sprintf("Members: %v", data.GetMembers())),
-			widget.NewLabel(fmt.Sprintf("Creation Date: %v", data.GetCreationDate())),
-			widget.NewLabel(fmt.Sprintf("First Album: %s", data.GetFirstAlbum())),
-			widget.NewLabel(fmt.Sprintf("Locations: %s", data.GetLocations())),
-			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", data.GetConcertDates())),
-			widget.NewLabel(fmt.Sprintf("Relation: %s", data.GetRelation())),
+			widget.NewLabel(fmt.Sprintf("Image: %v", structs.GetImage())),
+			widget.NewLabel(fmt.Sprintf("Name: %s", structs.GetName())),
+			widget.NewLabel(fmt.Sprintf("Members: %v", structs.GetMembers())),
+			widget.NewLabel(fmt.Sprintf("Creation Date: %v", structs.GetCreationDate())),
+			widget.NewLabel(fmt.Sprintf("First Album: %s", structs.GetFirstAlbum())),
+			widget.NewLabel(fmt.Sprintf("Locations: %s", structs.GetLocations())),
+			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", structs.GetConcertDates())),
+			widget.NewLabel(fmt.Sprintf("Relation: %s", structs.GetRelation())),
 		)
 
 		searchEntry := widget.NewEntry()
@@ -65,7 +65,6 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 			buttonHome,
 			searchEntry,
 			searchButton,
-			widget.NewLabel("Artist Details"),
 			artistContainer,
 		))
 		return
