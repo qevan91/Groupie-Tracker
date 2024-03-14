@@ -3,6 +3,7 @@ package structs
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -51,7 +52,26 @@ func GetFirstAlbum() string {
 }
 
 func GetLocations() string {
-	return Art.Locations
+
+	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
+	locData := Art.Locations
+
+	client := &http.Client{} // Créer un client HTTP
+
+	// Structure pour stocker les données JSON
+	var data map[string]interface{}
+
+	// Décodage des données JSON dans la structure
+	if err := json.Unmarshal([]byte(locData), &data); err != nil {
+		fmt.Println("Erreur lors du décodage JSON:", err)
+	}
+
+	for key := range data {
+		fmt.Println("Clé:", key)
+		// Construction de l'URL de requête
+		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
+	}
+
 }
 
 func GetConcertDates() string {
