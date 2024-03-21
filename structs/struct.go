@@ -93,7 +93,8 @@ func GetLocations() string {
 		firstloc := dataGeoc["features"].([]interface{})[0].(map[string]interface{})
 		// Accéder à la clé "geometry" du premier élément dans "features"
 		geometry := firstloc["geometry"].(map[string]interface{})
-
+		geo := geometry["coordinates"].([]float64)
+		
 	}
 	return ""
 }
