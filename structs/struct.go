@@ -3,7 +3,6 @@ package structs
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -51,7 +50,7 @@ func GetFirstAlbum() string {
 	return Art.FirstAlbum
 }
 
-func GetLocations() string {
+/*func GetLocations() string {
 
 	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
 	locData := Art.Locations
@@ -72,7 +71,7 @@ func GetLocations() string {
 		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
 	}
 
-}
+}*/
 
 func GetConcertDates() string {
 	return Art.ConcertDates
@@ -111,7 +110,8 @@ func GetArtistByName(artistName string) (*Artist, error) {
 
 	var artist *Artist
 	for _, a := range artists {
-		if strings.ToLower(a.Name) == input {
+		p := strings.Join(a.Members, " ")
+		if strings.Contains(strings.ToLower(a.Name), input) || strings.Contains(strings.ToLower(p), input) {
 			artist = &a
 			break
 		}
