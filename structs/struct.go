@@ -56,8 +56,6 @@ func GetLocations() string {
 	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
 	locData := Art.Locations
 
-	client := &http.Client{} // Créer un client HTTP
-
 	// Structure pour stocker les données JSON
 	var data map[string]interface{}
 
@@ -68,8 +66,23 @@ func GetLocations() string {
 
 	for key := range data {
 		fmt.Println("Clé:", key)
+
 		// Construction de l'URL de requête
 		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
+
+		response, err := http.Get(url)
+    	if err != nil {
+        	fmt.Println("Erreur lors de la requête:", err)
+    	}
+		defer response.Body.Close()
+
+		var dataGeoc map[string]interface{}
+        if err := json.NewDecoder(response.Body).Decode(&dataGeoc); err != nil {
+            fmt.Println("Erreur lors de l'analyse de la réponse:", err)
+            continue
+        }
+
+
 	}
 
 }
