@@ -71,20 +71,25 @@ func GetLocations() string {
 		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
 
 		response, err := http.Get(url)
-    	if err != nil {
-        	fmt.Println("Erreur lors de la requête:", err)
-    	}
+		if err != nil {
+			fmt.Println("Erreur lors de la requête:", err)
+		}
 		defer response.Body.Close()
 
 		var dataGeoc map[string]interface{}
-        if err := json.NewDecoder(response.Body).Decode(&dataGeoc); err != nil {
-            fmt.Println("Erreur lors de l'analyse de la réponse:", err)
-            continue
-        }
+		if err := json.NewDecoder(response.Body).Decode(&dataGeoc); err != nil {
+			fmt.Println("Erreur lors de l'analyse de la réponse:", err)
+			continue
+		}
 
-
+		// Boucle à travers chaque paire clé-valeur dans la carte
+		for key, value := range dataGeoc {
+			fmt.Println("Location :", key, "Valeur:", value)
+			return value.(string)
+		}
+		
 	}
-
+	return ""
 }
 
 func GetConcertDates() string {
