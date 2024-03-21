@@ -11,6 +11,7 @@ import (
 var ErrArtistNotFound = errors.New("artist not found")
 var Art *Artist
 var ArtistList []Artist
+var Geometry []float64
 
 type Artist struct {
 	ID           int      `json:"id"`
@@ -22,6 +23,12 @@ type Artist struct {
 	Locations    string   `json:"locations"`
 	ConcertDates string   `json:"concert_dates"`
 	Relation     string   `json:"relations"`
+}
+
+type Location struct {
+	ID    int      `json:"id"`
+	Loc   []string `json:"locations"`
+	Dates []string `json:"dates"`
 }
 
 func GetID() int {
@@ -57,14 +64,14 @@ func GetLocations() string {
 	locData := Art.Locations
 
 	// Structure pour stocker les données JSON
-	var data map[string]interface{}
+	var data Location
 
 	// Décodage des données JSON dans la structure
 	if err := json.Unmarshal([]byte(locData), &data); err != nil {
 		fmt.Println("Erreur lors du décodage JSON:", err)
 	}
 
-	for key := range data {
+	for _, key := range data.Loc {
 		fmt.Println("Clé:", key)
 
 		// Construction de l'URL de requête
@@ -83,11 +90,10 @@ func GetLocations() string {
 		}
 
 		// Boucle à travers chaque paire clé-valeur dans la carte
-		for key, value := range dataGeoc {
-			fmt.Println("Location :", key, "Valeur:", value)
-			return value.(string)
-		}
-		
+		firstloc := dataGeoc["features"].([]interface{})[0].(map[string]interface{})
+		// Accéder à la clé "geometry" du premier élément dans "features"
+		geometry := firstloc["geometry"].(map[string]interface{})
+
 	}
 	return ""
 }
