@@ -8,8 +8,10 @@ import (
 )
 
 var ErrArtistNotFound = errors.New("artist not found")
+var ErrArtistRelationsNotFound = errors.New("relation not found")
 var Art *Artist
 var ArtistList []Artist
+var Rel *Relation
 
 type Artist struct {
 	ID           int      `json:"id"`
@@ -21,6 +23,11 @@ type Artist struct {
 	Locations    string   `json:"locations"`
 	ConcertDates string   `json:"concert_dates"`
 	Relation     string   `json:"relations"`
+}
+
+type Relation struct {
+	ID             int                 `json:"id"`
+	DatesLocations map[string][]string `json:"datesLocations"`
 }
 
 func GetID() int {
@@ -77,12 +84,16 @@ func GetConcertDates() string {
 	return Art.ConcertDates
 }
 
+func GetArtists() []Artist {
+	return ArtistList
+}
+
 func GetRelation() string {
 	return Art.Relation
 }
 
-func GetArtists() []Artist {
-	return ArtistList
+func GetDateLocations() map[string][]string {
+	return Rel.DatesLocations
 }
 
 func FetchArtists() ([]Artist, error) {
@@ -124,4 +135,41 @@ func GetArtistByName(artistName string) (*Artist, error) {
 	Art = artist
 
 	return artist, nil
+}
+
+func FetchRelations() ([]Relation, error) {
+	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var relations []Relation
+	if err := json.NewDecoder(resp.Body).Decode(&relations); err != nil {
+		return nil, err
+	}
+
+	return relations, nil
+}
+
+func GetRelations(Date string) ([]Relation, error) {
+	input := strings.ToLower(Date)
+
+	relations, err := FetchRelations()
+	if err != nil {
+		return nil, err
+	}
+
+	var artistRelations []Relation
+	for _, rel := range relations {
+		if strings.Contains(strings.ToLower(rel.DatesLocations[Date][Art.ID]), input) {
+			artistRelations = append(artistRelations, rel)
+		}
+	}
+
+	if len(artistRelations) == 0 {
+		return nil, ErrArtistRelationsNotFound
+	}
+
+	return artistRelations, nil
 }
