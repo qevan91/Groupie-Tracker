@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -29,7 +28,7 @@ type Artist struct {
 type Location struct {
 	ID    int      `json:"id"`
 	Loc   []string `json:"locations"`
-	Dates []string `json:"dates"`
+	Dates string   `json:"dates"`
 }
 
 func GetID() int {
@@ -62,62 +61,30 @@ func GetFirstAlbum() string {
 func GetLocations() string {
 
 	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
-	locData := Art.Locations
 
-	// Structure pour stocker les données JSON
-	var data Location
-
-	// Décodage des données JSON dans la structure
-	if err := json.Unmarshal([]byte(locData), &data); err != nil {
-		fmt.Println("Erreur lors du décodage JSON:", err)
+	url := fmt.Sprintf("https://groupietrackers.herokuapp.com/api/locations/%d", Art.ID)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
 	}
+	defer resp.Body.Close()
 
-	for _, key := range data.Loc {
-		fmt.Println("Clé:", key)
-
-		// Construction de l'URL de requête
-		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
-
-		response, err := http.Get(url)
-		if err != nil {
-			fmt.Println("Erreur lors de la requête:", err)
-		}
-		defer response.Body.Close()
-
-		var dataGeoc map[string]interface{}
-		if err := json.NewDecoder(response.Body).Decode(&dataGeoc); err != nil {
-			fmt.Println("Erreur lors de l'analyse de la réponse:", err)
-			continue
-		}
-
-		// Boucle à travers chaque paire clé-valeur dans la carte
-		firstloc := dataGeoc["features"].([]interface{})[0].(map[string]interface{})
-		// Accéder à la clé "geometry" du premier élément dans "features"
-		geometry := firstloc["geometry"].(map[string]interface{})
-		geo := geometry["coordinates"].([]float64)
-
-		for i := 0; i < len(geo); i++ {
-			Geometry = append(Geometry, geo[i])
-		}
+	var loc Location
+	if err := json.NewDecoder(resp.Body).Decode(&loc); err != nil {
+		fmt.Println(err)
 	}
+	fmt.Println(loc)
 
-	var concatenatedString string
+	for _, l := range loc.Loc {
+	// Construction de l'URL de requête
+	url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
 
-	if len(Geometry) >= 2 {
-		float1 := Geometry[0]
-		float2 := Geometry[1]
-
-		// Convertir les nombres flottants en chaînes de caractères
-		floatStr1 := strconv.FormatFloat(float1, 'f', -1, 64)
-		floatStr2 := strconv.FormatFloat(float2, 'f', -1, 64)
-
-		// Concaténer les deux chaînes de caractères
-		concatenatedString = floatStr1 + " " + floatStr2
-	} else {
-		concatenatedString = "Not enough data for concatenation"
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Erreur lors de la requête:", err)
 	}
-
-	return concatenatedString
+	defer response.Body.Close()
+	}
 
 }
 
