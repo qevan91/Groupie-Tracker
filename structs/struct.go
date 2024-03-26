@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -76,16 +77,24 @@ func GetLocations() string {
 	fmt.Println(loc)
 
 	for _, l := range loc.Loc {
-	// Construction de l'URL de requête
-	url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
+		// Construction de l'URL de requête
+		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
 
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Erreur lors de la requête:", err)
-	}
-	defer response.Body.Close()
-	}
+		response, err := http.Get(url)
+		if err != nil {
+			fmt.Println("Erreur lors de la requête:", err)
+		}
+		defer response.Body.Close()
 
+		jsonData, err := io.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Erreur lors de la lecture du corps de la réponse:", err)
+		}
+
+		fmt.Println("Données JSON:", string(jsonData))
+
+	}
+	return loc.Dates
 }
 
 func GetConcertDates() string {
