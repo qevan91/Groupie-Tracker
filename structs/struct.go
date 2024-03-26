@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -94,9 +95,30 @@ func GetLocations() string {
 		// Accéder à la clé "geometry" du premier élément dans "features"
 		geometry := firstloc["geometry"].(map[string]interface{})
 		geo := geometry["coordinates"].([]float64)
-		
+
+		for i := 0; i < len(geo); i++ {
+			Geometry = append(Geometry, geo[i])
+		}
 	}
-	return ""
+
+	var concatenatedString string
+
+	if len(Geometry) >= 2 {
+		float1 := Geometry[0]
+		float2 := Geometry[1]
+
+		// Convertir les nombres flottants en chaînes de caractères
+		floatStr1 := strconv.FormatFloat(float1, 'f', -1, 64)
+		floatStr2 := strconv.FormatFloat(float2, 'f', -1, 64)
+
+		// Concaténer les deux chaînes de caractères
+		concatenatedString = floatStr1 + " " + floatStr2
+	} else {
+		concatenatedString = "Not enough data for concatenation"
+	}
+
+	return concatenatedString
+
 }
 
 func GetConcertDates() string {
