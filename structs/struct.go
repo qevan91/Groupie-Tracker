@@ -111,6 +111,24 @@ func FetchArtists() ([]Artist, error) {
 	return artists, nil
 }
 
+func FetchRelations() ([]Relation, error) {
+	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var relation Relation
+
+	if err := json.NewDecoder(resp.Body).Decode(&relation); err != nil {
+		return nil, err
+	}
+
+	relations := []Relation{relation}
+
+	return relations, nil
+}
+
 func GetArtistByName(artistName string) (*Artist, error) {
 	input := strings.ToLower(artistName)
 
@@ -137,37 +155,28 @@ func GetArtistByName(artistName string) (*Artist, error) {
 	return artist, nil
 }
 
-func FetchRelations() ([]Relation, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var relations []Relation
-	if err := json.NewDecoder(resp.Body).Decode(&relations); err != nil {
-		return nil, err
-	}
-
-	return relations, nil
-}
-
-func GetRelations(Date string) ([]Relation, error) {
-	input := strings.ToLower(Date)
+func GetRelations(City string) (*Relation, error) {
+	input := City
 
 	relations, err := FetchRelations()
 	if err != nil {
 		return nil, err
 	}
 
-	var artistRelations []Relation
-	for _, rel := range relations {
-		if strings.Contains(strings.ToLower(rel.DatesLocations[Date][Art.ID]), input) {
-			artistRelations = append(artistRelations, rel)
+	var artistRelations *Relation
+
+	for _, r := range relations {
+		if datesLocations, ok := r.DatesLocations[""]; ok {
+			for _, dateLocation := range datesLocations {
+				if strings.Contains(dateLocation, input) {
+					artistRelations = &r
+					break
+				}
+			}
 		}
 	}
 
-	if len(artistRelations) == 0 {
+	if artistRelations == nil {
 		return nil, ErrArtistRelationsNotFound
 	}
 
