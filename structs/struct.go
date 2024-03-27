@@ -193,26 +193,6 @@ func GetRelations(City string) (*Relation, error) {
 	return nil, ErrArtistRelationsNotFound
 }
 
-func ConcatenateDatesLocations(datesLocations map[string][]string) string {
-	var concatenatedDates string
-
-	for _, dates := range datesLocations {
-		concatenatedDates += strings.Join(dates, " ") + " "
-	}
-
-	return concatenatedDates
-}
-
-func ConcatenateCities(datesLocations map[string][]string) string {
-	var concatenatedCities string
-
-	for city := range datesLocations {
-		concatenatedCities += city + " "
-	}
-
-	return concatenatedCities
-}
-
 /*func GetByID() ([]Relation, error) {
 	relations, err := FetchRelations()
 	if err != nil {
