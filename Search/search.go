@@ -10,8 +10,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
-	artist, err := structs.GetArtistByName(artistNAME)
+func PerformPostJsonRequest(w fyne.Window, artistName string) {
+	artist, err := structs.GetArtistByName(artistName)
 	if err != nil {
 		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
 			w.MainMenu()
@@ -37,6 +37,11 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 		return
 	}
 
+	relation, err := structs.GetRelationsByID(structs.GetArtisteID())
+	if err != nil {
+		fmt.Println("Erreur lors de la récupération des relations:", err)
+	}
+
 	if artist != nil {
 
 		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
@@ -49,9 +54,9 @@ func PerformPostJsonRequest(w fyne.Window, artistNAME string) {
 			widget.NewLabel(fmt.Sprintf("Members: %v", structs.GetMembers())),
 			widget.NewLabel(fmt.Sprintf("Creation Date: %v", structs.GetCreationDate())),
 			widget.NewLabel(fmt.Sprintf("First Album: %s", structs.GetFirstAlbum())),
-			widget.NewLabel(fmt.Sprintf("Locations: %s", structs.GetLocations())),
+			//widget.NewLabel(fmt.Sprintf("Locations: %s", structs.GetLocations())),
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", structs.GetConcertDates())),
-			widget.NewLabel(fmt.Sprintf("Relation: %s", structs.GetRelation())),
+			widget.NewLabel(fmt.Sprintf("Location: %v", relation)),
 		)
 
 		searchEntry := widget.NewEntry()

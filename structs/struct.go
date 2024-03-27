@@ -31,7 +31,7 @@ type Relation struct {
 	DatesLocations map[string][]string `json:"datesLocations"`
 }
 
-func GetID() int {
+func GetArtisteID() int {
 	return Art.ID
 }
 
@@ -81,12 +81,20 @@ func GetFirstAlbum() string {
 
 }*/
 
+func GetRelation() string {
+	return Art.Relation
+}
+
 func GetConcertDates() string {
 	return Art.ConcertDates
 }
 
 func GetArtists() []Artist {
 	return ArtistList
+}
+
+func GetRelationID() int {
+	return Rel.ID
 }
 
 func GetRelationList() ([]Relation, error) {
@@ -101,6 +109,9 @@ func GetRelationList() ([]Relation, error) {
 }
 
 func GetDateLocations() map[string][]string {
+	if GetArtisteID() == GetRelationID() {
+		return Rel.DatesLocations
+	}
 	return Rel.DatesLocations
 }
 
@@ -193,13 +204,18 @@ func GetRelations(City string) (*Relation, error) {
 	return nil, ErrArtistRelationsNotFound
 }
 
-/*func GetByID() ([]Relation, error) {
+func GetRelationsByID(artistID int) (*Relation, error) {
 	relations, err := FetchRelations()
 	if err != nil {
 		return nil, err
 	}
 
-	if Art.ID == Rel.ID {
-		return relations, nil
+	for _, r := range relations {
+		if r.ID == artistID {
+			Rel = &r
+			return &r, nil
+		}
 	}
-}*/
+
+	return nil, ErrArtistRelationsNotFound
+}
