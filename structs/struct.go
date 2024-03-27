@@ -12,6 +12,7 @@ var ErrArtistRelationsNotFound = errors.New("relation not found")
 var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
+var RelationList []Relation
 
 type Artist struct {
 	ID           int      `json:"id"`
@@ -88,8 +89,15 @@ func GetArtists() []Artist {
 	return ArtistList
 }
 
-func GetRelation() string {
-	return Art.Relation
+func GetRelationList() ([]Relation, error) {
+	relations, err := FetchRelations()
+	if err != nil {
+		return nil, err
+	}
+
+	RelationList = relations
+
+	return RelationList, nil
 }
 
 func GetDateLocations() map[string][]string {
@@ -118,13 +126,17 @@ func FetchRelations() ([]Relation, error) {
 	}
 	defer resp.Body.Close()
 
-	var relation Relation
+	var relations []Relation
 
-	if err := json.NewDecoder(resp.Body).Decode(&relation); err != nil {
+	var response struct {
+		Index []Relation `json:"index"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
 
-	relations := []Relation{relation}
+	relations = response.Index
 
 	return relations, nil
 }
@@ -156,29 +168,58 @@ func GetArtistByName(artistName string) (*Artist, error) {
 }
 
 func GetRelations(City string) (*Relation, error) {
-	input := City
+	input := strings.ToLower(City)
 
 	relations, err := FetchRelations()
 	if err != nil {
 		return nil, err
 	}
 
-	var artistRelations *Relation
-
 	for _, r := range relations {
-		if datesLocations, ok := r.DatesLocations[""]; ok {
-			for _, dateLocation := range datesLocations {
-				if strings.Contains(dateLocation, input) {
-					artistRelations = &r
-					break
+		for city, dates := range r.DatesLocations {
+			if strings.Contains(strings.ToLower(city), input) {
+				Rel = &r
+				return &r, nil
+			}
+			for _, date := range dates {
+				if strings.Contains(strings.ToLower(date), input) {
+					Rel = &r
+					return &r, nil
 				}
 			}
 		}
 	}
 
-	if artistRelations == nil {
-		return nil, ErrArtistRelationsNotFound
+	return nil, ErrArtistRelationsNotFound
+}
+
+func ConcatenateDatesLocations(datesLocations map[string][]string) string {
+	var concatenatedDates string
+
+	for _, dates := range datesLocations {
+		concatenatedDates += strings.Join(dates, " ") + " "
 	}
 
-	return artistRelations, nil
+	return concatenatedDates
 }
+
+func ConcatenateCities(datesLocations map[string][]string) string {
+	var concatenatedCities string
+
+	for city := range datesLocations {
+		concatenatedCities += city + " "
+	}
+
+	return concatenatedCities
+}
+
+/*func GetByID() ([]Relation, error) {
+	relations, err := FetchRelations()
+	if err != nil {
+		return nil, err
+	}
+
+	if Art.ID == Rel.ID {
+		return relations, nil
+	}
+}*/
