@@ -5,6 +5,7 @@ import (
 	"gpo/structs"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -49,7 +50,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		})
 
 		artistContainer := container.NewVBox(
-			widget.NewLabel(fmt.Sprintf("Image: %v", structs.GetImage())),
+			//widget.NewLabel(fmt.Sprintf("Image: %v", structs.GetImage())),
 			widget.NewLabel(fmt.Sprintf("Name: %s", structs.GetName())),
 			widget.NewLabel(fmt.Sprintf("Members: %v", structs.GetMembers())),
 			widget.NewLabel(fmt.Sprintf("Creation Date: %v", structs.GetCreationDate())),
@@ -58,7 +59,19 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", structs.GetConcertDates())),
 			widget.NewLabel(fmt.Sprintf("Location: %v", relation)),
 		)
+		imgResource, err := fyne.LoadResourceFromURLString(structs.GetImage())
+		if err != nil {
+			panic(err)
+		}
+		img := canvas.NewImageFromResource(imgResource)
 
+		// Redimensionnement de l'image
+		img.SetMinSize(fyne.NewSize(200, 200))
+		img.FillMode = canvas.ImageFillContain
+
+		content := container.NewVBox(
+			img,
+		)
 		searchEntry := widget.NewEntry()
 
 		searchButton := widget.NewButton("Recherche", func() {
@@ -70,6 +83,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			buttonHome,
 			searchEntry,
 			searchButton,
+			content,
 			artistContainer,
 		))
 		return
