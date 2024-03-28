@@ -204,6 +204,29 @@ func GetRelations(City string) (*Relation, error) {
 	return nil, ErrArtistRelationsNotFound
 }
 
+func GetArtistByID(RelationID int) (*Artist, error) {
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+
+	var artist *Artist
+	for _, a := range artists {
+		if Art.ID == RelationID {
+			artist = &a
+			break
+		}
+	}
+
+	if artist == nil {
+		return nil, ErrArtistNotFound
+	}
+
+	Art = artist
+
+	return artist, nil
+}
+
 func GetRelationsByID(artistID int) (*Relation, error) {
 	relations, err := FetchRelations()
 	if err != nil {

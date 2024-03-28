@@ -24,6 +24,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			searchTerm := searchEntry.Text
 			PerformPostJsonRequest(w, searchTerm)
 		})
+
 		if err == structs.ErrArtistNotFound {
 			w.SetContent(container.NewVBox(
 				buttonHome,
@@ -50,7 +51,6 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		})
 
 		artistContainer := container.NewVBox(
-			//widget.NewLabel(fmt.Sprintf("Image: %v", structs.GetImage())),
 			widget.NewLabel(fmt.Sprintf("Name: %s", structs.GetName())),
 			widget.NewLabel(fmt.Sprintf("Members: %v", structs.GetMembers())),
 			widget.NewLabel(fmt.Sprintf("Creation Date: %v", structs.GetCreationDate())),
@@ -59,13 +59,13 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", structs.GetConcertDates())),
 			widget.NewLabel(fmt.Sprintf("Location: %v", relation)),
 		)
+		container.NewCenter(artistContainer)
 		imgResource, err := fyne.LoadResourceFromURLString(structs.GetImage())
 		if err != nil {
 			panic(err)
 		}
 		img := canvas.NewImageFromResource(imgResource)
 
-		// Redimensionnement de l'image
 		img.SetMinSize(fyne.NewSize(200, 200))
 		img.FillMode = canvas.ImageFillContain
 
