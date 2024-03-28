@@ -62,6 +62,7 @@ func MainMenu() {
 		if text == "" {
 			artistContainer.RemoveAll()
 			overlay.RemoveAll()
+			return
 		}
 		overlay.Add(img)
 		artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", art.Name)))
@@ -104,6 +105,7 @@ func MainMenu() {
 		buttonHome,
 		searchEntry,
 		searchButton,
+		overlay,
 		artistContainer,
 		listeArtist,
 	)
