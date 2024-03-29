@@ -2,7 +2,6 @@ package data
 
 import (
 	"fmt"
-	"gpo/structs"
 	"image"
 	"net/http"
 
@@ -28,7 +27,7 @@ func FetchImage(url string) *canvas.Image {
 	return canvas.NewImageFromImage(img)
 }
 
-func ShowArtistDetails(a fyne.App, artist structs.Artist) {
+func ShowArtistDetails(a fyne.App, artist Artist) {
 	w := a.NewWindow(artist.Name)
 	info := fmt.Sprintf("Name: %s\nMembers: %v\nFirst Album: %s\nCreation Date: %d", artist.Name, artist.Members, artist.FirstAlbum, artist.CreationDate)
 	w.SetContent(widget.NewLabel(info))

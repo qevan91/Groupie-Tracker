@@ -1,7 +1,7 @@
 package main
 
-import "gpo/mainmenu"
+import "gpo/app"
 
 func main() {
-	mainmenu.MainMenu()
+	app.MainMenu()
 }

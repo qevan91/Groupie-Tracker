@@ -1,10 +1,10 @@
-package mainmenu
+package app
 
 import (
 	"fmt"
-	search "gpo/Search"
+
 	"gpo/data"
-	"gpo/structs"
+	//"gpo/structs"
 	"image/color"
 	"os"
 
@@ -23,7 +23,7 @@ func MainMenu() {
 
 	w.Resize(fyne.NewSize(1000, 500))
 
-	artists, err := structs.FetchArtists()
+	artists, err := data.FetchArtists()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erreur lors de la récupération des artistes: %v\n", err)
 		return
@@ -35,13 +35,14 @@ func MainMenu() {
 
 	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
 		w.MainMenu()
+		fmt.Print("retour au menu")
 	})
 
 	searchEntry := widget.NewEntry()
 
 	searchButton := widget.NewButton("Recherche", func() {
 		searchTerm := searchEntry.Text
-		search.PerformPostJsonRequest(w, searchTerm)
+		PerformPostJsonRequest(w, searchTerm)
 	})
 
 	artistContainer := container.NewHBox()
@@ -51,7 +52,7 @@ func MainMenu() {
 	searchEntry.OnChanged = func(text string) {
 		artistContainer.RemoveAll()
 		overlay.RemoveAll()
-		art, err := structs.GetArtistByName(text)
+		art, err := data.GetArtistByName(text)
 		if err != nil {
 			fmt.Println("Problème")
 			return

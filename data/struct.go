@@ -1,4 +1,4 @@
-package structs
+package data
 
 import (
 	"encoding/json"
