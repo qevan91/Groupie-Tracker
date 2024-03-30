@@ -12,7 +12,6 @@ import (
 var ErrArtistNotFound = errors.New("artist not found")
 var Art *Artist
 var ArtistList []Artist
-var Geometry []float64
 
 type Artist struct {
 	ID           int      `json:"id"`
@@ -30,6 +29,50 @@ type Location struct {
 	ID    int      `json:"id"`
 	Loc   []string `json:"locations"`
 	Dates string   `json:"dates"`
+}
+
+type Query struct {
+	Type     string    `json:"type"`
+	Features []Feature `json:"features"`
+}
+
+type Feature struct {
+	ID                string    `json:"id"`
+	Type              string    `json:"type"`
+	PlaceType         []string  `json:"place_type"`
+	Relevance         float64   `json:"relevance"`
+	Properties        Property  `json:"properties"`
+	Text              string    `json:"text"`
+	PlaceName         string    `json:"place_name"`
+	MatchingText      string    `json:"matching_text,omitempty"`
+	MatchingPlaceName string    `json:"matching_place_name,omitempty"`
+	Bbox              []float64 `json:"bbox,omitempty"`
+	Center            []float64 `json:"center,omitempty"`
+	Geometry          Geometry  `json:"geometry,omitempty"`
+	Context           []Context `json:"context,omitempty"`
+}
+
+type Property struct {
+	MapboxID   string `json:"mapbox_id,omitempty"`
+	Wikidata   string `json:"wikidata,omitempty"`
+	ShortCode  string `json:"short_code,omitempty"`
+	Foursquare string `json:"foursquare,omitempty"`
+	Landmark   bool   `json:"landmark,omitempty"`
+	Category   string `json:"category,omitempty"`
+	Address    string `json:"address,omitempty"`
+}
+
+type Geometry struct {
+	Type        string    `json:"type,omitempty"`
+	Coordinates []float64 `json:"coordinates,omitempty"`
+}
+
+type Context struct {
+	ID        string `json:"id,omitempty"`
+	MapboxID  string `json:"mapbox_id,omitempty"`
+	Wikidata  string `json:"wikidata,omitempty"`
+	ShortCode string `json:"short_code,omitempty"`
+	Text      string `json:"text,omitempty"`
 }
 
 func GetID() int {
