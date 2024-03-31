@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -102,6 +102,18 @@ func GetFirstAlbum() string {
 	return Art.FirstAlbum
 }
 
+func float64ArrayToString(arr [][]float64) string {
+	var result []string
+
+	for _, innerArr := range arr {
+		for _, num := range innerArr {
+			result = append(result, strconv.FormatFloat(num, 'f', -1, 64))
+		}
+	}
+
+	return strings.Join(result, ", ")
+}
+
 func GetLocations() string {
 
 	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
@@ -117,8 +129,7 @@ func GetLocations() string {
 	if err := json.NewDecoder(resp.Body).Decode(&loc); err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(loc)
-
+	var returnTab [][]float64
 	for _, l := range loc.Loc {
 		// Construction de l'URL de requête
 		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
@@ -129,15 +140,13 @@ func GetLocations() string {
 		}
 		defer response.Body.Close()
 
-		jsonData, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("Erreur lors de la lecture du corps de la réponse:", err)
+		var datas Query
+		if err := json.NewDecoder(response.Body).Decode(&datas); err != nil {
+			fmt.Println(err)
 		}
-
-		fmt.Println("Données JSON:", string(jsonData))
-
+		returnTab = append(returnTab, datas.Features[0].Center)
 	}
-	return loc.Dates
+	return float64ArrayToString(returnTab)
 }
 
 func GetConcertDates() string {
