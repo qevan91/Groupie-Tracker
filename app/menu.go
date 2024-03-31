@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"gpo/data"
-	//"gpo/structs"
 	"image/color"
 	"os"
 
@@ -100,12 +99,43 @@ func MainMenu() {
 	if count > 0 {
 		listeArtist.Add(grid)
 	}
+	// Years Slider
+	yearSlider := widget.NewSlider(0, 67)
+	yearSlider.Step = 1
+	yearSliderValue := widget.NewLabel("1957")
+	yearSlider.OnChanged = func(value float64) {
+		selectedYear := int(value) + 1957
+		yearSliderValue.SetText(fmt.Sprintf("%d", selectedYear))
+		artistContainer.RemoveAll()
+		overlay.RemoveAll()
+		artists, err := data.GetArtistsByYear(selectedYear)
+		if err != nil {
+			fmt.Println("Problème:", err)
+			return
+		}
+
+		for _, artist := range artists {
+			img := data.FetchImage(artist.Image)
+			img.FillMode = canvas.ImageFillContain
+			img.SetMinSize(fyne.NewSize(100, 100))
+			overlay.Add(img)
+			artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", artist.Name)))
+		}
+	}
+
+	careerStartingYearLabel := widget.NewLabel("Career Starting Year: ")
+
+	hbox := container.NewHBox()
+	hbox.Add(careerStartingYearLabel)
+	hbox.Add(yearSliderValue)
 
 	content := container.NewVBox(
 		titleContainer,
 		buttonHome,
 		searchEntry,
 		searchButton,
+		yearSlider,
+		hbox,
 		overlay,
 		artistContainer,
 		listeArtist,

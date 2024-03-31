@@ -9,6 +9,7 @@ import (
 
 var ErrArtistNotFound = errors.New("artist not found")
 var ErrArtistRelationsNotFound = errors.New("relation not found")
+var ErrNoArtistsForYear = errors.New("aucun artiste trouvé pour cette année")
 var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
@@ -241,4 +242,27 @@ func GetRelationsByID(artistID int) (*Relation, error) {
 	}
 
 	return nil, ErrArtistRelationsNotFound
+}
+
+func GetArtistsByYear(year int) ([]Artist, error) {
+	// Récupère tous les artistes
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+
+	// Filtrer les artistes pour l'année donnée
+	var filteredArtists []Artist
+	for _, artist := range artists {
+		if artist.CreationDate == year {
+			filteredArtists = append(filteredArtists, artist)
+		}
+	}
+
+	// Vérifier si des artistes ont été trouvés pour l'année donnée
+	if len(filteredArtists) == 0 {
+		return nil, ErrNoArtistsForYear
+	}
+
+	return filteredArtists, nil
 }

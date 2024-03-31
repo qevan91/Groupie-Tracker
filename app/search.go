@@ -13,20 +13,16 @@ import (
 	"fyne.io/fyne/v2/widget"
 
 	"gpo/data"
-
-	"image/color"
-	"os"
-
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/layout"
+	//"image/color"
+	//"os"
+	//"fyne.io/fyne/v2/layout"
 )
 
 func PerformPostJsonRequest(w fyne.Window, artistName string) {
 	artist, err := data.GetArtistByName(artistName)
 	if err != nil {
 		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-			//w.MainMenu()
-			//fmt.Print("retour au menu") sa ne revoir rien
+			MainMenu()
 		})
 
 		searchEntry := widget.NewEntry()
@@ -58,6 +54,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 	if artist != nil {
 
 		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
+			MainMenu()
 			//w.MainMenu()
 			//fmt.Print("retour au menu 2") //fonction plus a cause de Ontapped
 		})
@@ -90,15 +87,13 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			searchTerm := searchEntry.Text
 			PerformPostJsonRequest(w, searchTerm)
 		})
-		/*
-			handleHomeButton := func() {
-				fmt.Print("tu as cliquer /")
-				backToHomeContent := BackToHome()
-				w.SetContent(backToHomeContent.content)
-			}
 
-			buttonHome.OnTapped = handleHomeButton
-		*/
+		handleHomeButton := func() {
+			MainMenu()
+		}
+
+		buttonHome.OnTapped = handleHomeButton
+
 		w.SetContent(container.NewVBox(
 			buttonHome,
 			searchEntry,
@@ -109,105 +104,4 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 
 		return
 	}
-}
-
-func BackToHome() fyne.Window {
-	a := app.New()
-	w := a.NewWindow("Artist Details")
-
-	w.Resize(fyne.NewSize(1000, 500))
-
-	artists, err := data.FetchArtists()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error while fetching artists: %v\n", err)
-		return w
-	}
-
-	title := canvas.NewText("Groupie Tracker", color.White)
-	title.TextSize = 20
-	titleContainer := container.NewCenter(title)
-
-	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-		w.MainMenu()
-		fmt.Print("Return to menu")
-	})
-
-	searchEntry := widget.NewEntry()
-
-	searchButton := widget.NewButton("Search", func() {
-		searchTerm := searchEntry.Text
-		PerformPostJsonRequest(w, searchTerm)
-	})
-
-	artistContainer := container.NewHBox()
-
-	overlay := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
-
-	searchEntry.OnChanged = func(text string) {
-		artistContainer.RemoveAll()
-		overlay.RemoveAll()
-		art, err := data.GetArtistByName(text)
-		if err != nil {
-			fmt.Println("Problem")
-			return
-		}
-		img := data.FetchImage(art.Image)
-		img.FillMode = canvas.ImageFillContain
-		img.SetMinSize(fyne.NewSize(100, 100))
-		if text == "" {
-			artistContainer.RemoveAll()
-			overlay.RemoveAll()
-			return
-		}
-		overlay.Add(img)
-		artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", art.Name)))
-	}
-
-	grid := container.NewGridWithRows(0)
-	count := 0
-	listeArtist := container.NewVBox()
-
-	for _, artist := range artists {
-		img := data.FetchImage(artist.Image)
-		img.FillMode = canvas.ImageFillContain
-		img.SetMinSize(fyne.NewSize(100, 100))
-		infoButton := widget.NewButton("", func() {
-			data.ShowArtistDetails(a, artist)
-		})
-		infoButton.Importance = widget.LowImportance
-		infoButton.SetIcon(nil)
-		artistInfo := fmt.Sprintf(artist.Name)
-		artistLabel := widget.NewLabel(artistInfo)
-		overlay := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil),
-			img,
-			artistLabel,
-			infoButton,
-		)
-		grid.Add(overlay)
-		count++
-		if count == 4 {
-			count = 0
-			listeArtist.Add(grid)
-			grid = container.NewGridWithRows(0)
-		}
-	}
-	if count > 0 {
-		listeArtist.Add(grid)
-	}
-
-	content := container.NewVBox(
-		titleContainer,
-		buttonHome,
-		searchEntry,
-		searchButton,
-		overlay,
-		artistContainer,
-		listeArtist,
-	)
-
-	scroll := container.NewScroll(content)
-	w.SetContent(scroll)
-	w.Resize(fyne.NewSize(800, 600))
-	w.ShowAndRun()
-	return w
 }
