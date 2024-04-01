@@ -64,7 +64,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			widget.NewLabel(fmt.Sprintf("Members: %v", data.GetMembers())),
 			widget.NewLabel(fmt.Sprintf("Creation Date: %v", data.GetCreationDate())),
 			widget.NewLabel(fmt.Sprintf("First Album: %s", data.GetFirstAlbum())),
-			//widget.NewLabel(fmt.Sprintf("Locations: %s", data.GetLocations())),
+			widget.NewLabel(fmt.Sprintf("Locations: %s", data.GetLocations())),
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", data.GetConcertDates())),
 			widget.NewLabel(fmt.Sprintf("Location: %v", relation)),
 		)

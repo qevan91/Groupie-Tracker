@@ -3,7 +3,9 @@ package data
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +16,12 @@ var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
 var RelationList []Relation
+
+type Location struct {
+	ID    int      `json:"id"`
+	Loc   []string `json:"locations"`
+	Dates string   `json:"dates"`
+}
 
 type Artist struct {
 	ID           int      `json:"id"`
@@ -30,6 +38,62 @@ type Artist struct {
 type Relation struct {
 	ID             int                 `json:"id"`
 	DatesLocations map[string][]string `json:"datesLocations"`
+}
+
+type Query struct {
+	Type     string    `json:"type"`
+	Features []Feature `json:"features"`
+}
+
+type Feature struct {
+	ID                string    `json:"id"`
+	Type              string    `json:"type"`
+	PlaceType         []string  `json:"place_type"`
+	Relevance         float64   `json:"relevance"`
+	Properties        Property  `json:"properties"`
+	Text              string    `json:"text"`
+	PlaceName         string    `json:"place_name"`
+	MatchingText      string    `json:"matching_text,omitempty"`
+	MatchingPlaceName string    `json:"matching_place_name,omitempty"`
+	Bbox              []float64 `json:"bbox,omitempty"`
+	Center            []float64 `json:"center,omitempty"`
+	Geometry          Geometry  `json:"geometry,omitempty"`
+	Context           []Context `json:"context,omitempty"`
+}
+
+type Property struct {
+	MapboxID   string `json:"mapbox_id,omitempty"`
+	Wikidata   string `json:"wikidata,omitempty"`
+	ShortCode  string `json:"short_code,omitempty"`
+	Foursquare string `json:"foursquare,omitempty"`
+	Landmark   bool   `json:"landmark,omitempty"`
+	Category   string `json:"category,omitempty"`
+	Address    string `json:"address,omitempty"`
+}
+
+type Geometry struct {
+	Type        string    `json:"type,omitempty"`
+	Coordinates []float64 `json:"coordinates,omitempty"`
+}
+
+type Context struct {
+	ID        string `json:"id,omitempty"`
+	MapboxID  string `json:"mapbox_id,omitempty"`
+	Wikidata  string `json:"wikidata,omitempty"`
+	ShortCode string `json:"short_code,omitempty"`
+	Text      string `json:"text,omitempty"`
+}
+
+func float64ArrayToString(arr [][]float64) string {
+	var result []string
+
+	for _, innerArr := range arr {
+		for _, num := range innerArr {
+			result = append(result, strconv.FormatFloat(num, 'f', -1, 64))
+		}
+	}
+
+	return strings.Join(result, ", ")
 }
 
 func GetArtisteID() int {
@@ -59,28 +123,37 @@ func GetFirstAlbum() string {
 	return Art.FirstAlbum
 }
 
-/*func GetLocations() string {
+func GetLocations() string {
 
 	apiKey := "pk.eyJ1IjoiZ3JwdHJrIiwiYSI6ImNsdHIzdXo0YzA4djYya3VsaHYzbWFtYWUifQ.UGOVoLVD4F0i-R8LFBcfvw" // Acces Token pour API Mapbox
-	locData := Art.Locations
-
-	client := &http.Client{} // Créer un client HTTP
-
-	// Structure pour stocker les données JSON
-	var data map[string]interface{}
-
-	// Décodage des données JSON dans la structure
-	if err := json.Unmarshal([]byte(locData), &data); err != nil {
-		fmt.Println("Erreur lors du décodage JSON:", err)
+	url := fmt.Sprintf("https://groupietrackers.herokuapp.com/api/locations/%d", Art.ID)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
 	}
-
-	for key := range data {
-		fmt.Println("Clé:", key)
+	defer resp.Body.Close()
+	var loc Location
+	if err := json.NewDecoder(resp.Body).Decode(&loc); err != nil {
+		fmt.Println(err)
+	}
+	var returnTab [][]float64
+	for _, l := range loc.Loc {
 		// Construction de l'URL de requête
-		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", key, apiKey)
-	}
+		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
+		response, err := http.Get(url)
+		if err != nil {
+			fmt.Println("Erreur lors de la requête:", err)
+		}
+		defer response.Body.Close()
 
-}*/
+		var datas Query
+		if err := json.NewDecoder(response.Body).Decode(&datas); err != nil {
+			fmt.Println(err)
+		}
+		returnTab = append(returnTab, datas.Features[0].Center)
+	}
+	return float64ArrayToString(returnTab)
+}
 
 func GetRelation() string {
 	return Art.Relation
