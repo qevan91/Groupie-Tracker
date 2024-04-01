@@ -164,8 +164,13 @@ func GetConcertDates() string {
 	return Art.ConcertDates
 }
 
-func GetArtists() []Artist {
-	return ArtistList
+func GetArtists() ([]Artist, error) {
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+	ArtistList = artists
+	return ArtistList, nil
 }
 
 func GetRelationID() int {
@@ -188,43 +193,6 @@ func GetDateLocations() map[string][]string {
 		return Rel.DatesLocations
 	}
 	return Rel.DatesLocations
-}
-
-func FetchArtists() ([]Artist, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/artists")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var artists []Artist
-	if err := json.NewDecoder(resp.Body).Decode(&artists); err != nil {
-		return nil, err
-	}
-
-	return artists, nil
-}
-
-func FetchRelations() ([]Relation, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var relations []Relation
-
-	var response struct {
-		Index []Relation `json:"index"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-
-	relations = response.Index
-
-	return relations, nil
 }
 
 func GetArtistByName(artistName string) (*Artist, error) {

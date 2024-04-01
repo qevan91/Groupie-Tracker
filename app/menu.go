@@ -32,17 +32,110 @@ func MainMenu() {
 	title.TextSize = 20
 	titleContainer := container.NewCenter(title)
 
-	buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-		w.MainMenu()
-		fmt.Print("retour au menu")
-	})
-
 	searchEntry := widget.NewEntry()
 
 	searchButton := widget.NewButton("Recherche", func() {
 		searchTerm := searchEntry.Text
 		PerformPostJsonRequest(w, searchTerm)
 	})
+
+	filtregroupecont := container.NewHBox()
+
+	updateArtistDisplay := func(allGroups []data.Artist, num int) {
+		filtregroupecont.RemoveAll()
+		for _, group := range allGroups {
+			if len(group.Members) == num {
+				groupInfo := fmt.Sprintf("Nom du groupe : %s,", group.Name)
+				img := data.FetchImage(group.Image)
+				img.FillMode = canvas.ImageFillContain
+				img.SetMinSize(fyne.NewSize(100, 100))
+				groupLabel := widget.NewLabel(groupInfo)
+				filtregroupecont.Add(groupLabel)
+				filtregroupecont.Add(img)
+			}
+		}
+	}
+
+	numMembers1 := widget.NewCheck("1", nil)
+	numMembers2 := widget.NewCheck("2", nil)
+	numMembers3 := widget.NewCheck("3", nil)
+	numMembers4 := widget.NewCheck("4", nil)
+	numMembers5 := widget.NewCheck("5", nil)
+	numMembers6 := widget.NewCheck("6", nil)
+	numMembers7 := widget.NewCheck("7", nil)
+	numMembers8 := widget.NewCheck("8", nil)
+
+	numMembersContainer := container.New(layout.NewHBoxLayout(),
+		numMembers1, numMembers2, numMembers3, numMembers4, numMembers5, numMembers6, numMembers7, numMembers8,
+	)
+
+	numMembers1.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 1)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers2.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 2)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers3.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 3)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers4.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 4)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers5.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 5)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers6.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 6)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers7.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 7)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	numMembers8.OnChanged = func(checked bool) {
+		if checked {
+			updateArtistDisplay(artists, 8)
+		} else {
+			filtregroupecont.RemoveAll()
+		}
+	}
+
+	filters := container.New(layout.NewGridLayout(2),
+		numMembersContainer,
+	)
 
 	artistContainer := container.NewHBox()
 
@@ -112,7 +205,6 @@ func MainMenu() {
 		overlay.RemoveAll()
 		artists, err := data.GetArtistsByYear(selectedYear)
 		if err != nil {
-			fmt.Println("Problème:", err)
 			return
 		}
 
@@ -138,7 +230,6 @@ func MainMenu() {
 		overlay.RemoveAll()
 		artists, err := data.GetArtistsByFirstAlbumYear(selectedFirstAlbumDate)
 		if err != nil {
-			fmt.Println("Problème:", err)
 			return
 		}
 
@@ -153,9 +244,10 @@ func MainMenu() {
 
 	content := container.NewVBox(
 		titleContainer,
-		buttonHome,
 		searchEntry,
 		searchButton,
+		filters,
+		filtregroupecont,
 		careerStartingYearLabel,
 		yearSliderValue,
 		yearSlider,
@@ -169,12 +261,33 @@ func MainMenu() {
 
 	scroll := container.NewScroll(content)
 	w.SetContent(scroll)
-	w.Resize(fyne.NewSize(800, 600))
+
+	header := fyne.NewMainMenu(
+
+		fyne.NewMenu("Settings",
+			fyne.NewMenuItem("Dark theme", func() {
+				a.Settings().SetTheme(theme.DarkTheme())
+			}),
+
+			fyne.NewMenuItem("Light theme", func() {
+				a.Settings().SetTheme(theme.LightTheme())
+			}),
+
+			fyne.NewMenuItem("Full Screen", func() {
+				if w.FullScreen() == true {
+					w.SetFullScreen(false)
+				} else {
+					w.SetFullScreen(true)
+				}
+			}),
+		),
+		fyne.NewMenu("Home",
+			fyne.NewMenuItem("Home", func() {
+				w.SetContent(scroll)
+			}),
+		))
+
+	w.SetMainMenu(header)
+
 	w.ShowAndRun()
 }
-
-/*
-1973
-1967
-1963
-*/

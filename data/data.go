@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"net/http"
@@ -25,6 +26,43 @@ func FetchImage(url string) *canvas.Image {
 	}
 
 	return canvas.NewImageFromImage(img)
+}
+
+func FetchArtists() ([]Artist, error) {
+	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/artists")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var artists []Artist
+	if err := json.NewDecoder(resp.Body).Decode(&artists); err != nil {
+		return nil, err
+	}
+
+	return artists, nil
+}
+
+func FetchRelations() ([]Relation, error) {
+	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var relations []Relation
+
+	var response struct {
+		Index []Relation `json:"index"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+
+	relations = response.Index
+
+	return relations, nil
 }
 
 func ShowArtistDetails(a fyne.App, artist Artist) {

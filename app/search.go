@@ -3,28 +3,18 @@ package app
 import (
 	"fmt"
 
-	//"gpo/structs"
-
 	"fyne.io/fyne/v2"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"gpo/data"
-	//"image/color"
-	//"os"
-	//"fyne.io/fyne/v2/layout"
 )
 
 func PerformPostJsonRequest(w fyne.Window, artistName string) {
 	artist, err := data.GetArtistByName(artistName)
 	if err != nil {
-		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-			MainMenu()
-		})
-
 		searchEntry := widget.NewEntry()
 
 		searchButton := widget.NewButton("Recherche", func() {
@@ -34,7 +24,6 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 
 		if err == data.ErrArtistNotFound {
 			w.SetContent(container.NewVBox(
-				buttonHome,
 				searchEntry,
 				searchButton,
 				widget.NewLabel("Artist not found"),
@@ -52,12 +41,6 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 	}
 
 	if artist != nil {
-
-		buttonHome := widget.NewButtonWithIcon("Home", theme.HomeIcon(), func() {
-			MainMenu()
-			//w.MainMenu()
-			//fmt.Print("retour au menu 2") //fonction plus a cause de Ontapped
-		})
 
 		artistContainer := container.NewVBox(
 			widget.NewLabel(fmt.Sprintf("Name: %s", data.GetName())),
@@ -88,14 +71,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			PerformPostJsonRequest(w, searchTerm)
 		})
 
-		handleHomeButton := func() {
-			MainMenu()
-		}
-
-		buttonHome.OnTapped = handleHomeButton
-
 		w.SetContent(container.NewVBox(
-			buttonHome,
 			searchEntry,
 			searchButton,
 			content,
