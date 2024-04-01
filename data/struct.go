@@ -333,3 +333,48 @@ func GetArtistsByFirstAlbumYear(year int) ([]Artist, error) {
 
 	return filteredArtists, nil
 }
+
+func GetArtistByMember(artistMember string) ([]string, error) {
+	input := strings.ToLower(artistMember)
+
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+
+	var artistsMember []string
+	for _, a := range artists {
+		p := strings.Join(a.Members, " ")
+		if strings.Contains(strings.ToLower(p), input) {
+			artistsMember = append(artistsMember, p)
+		}
+	}
+
+	if len(artistsMember) == 0 {
+		return nil, ErrArtistNotFound
+	}
+
+	return artistsMember, nil
+}
+
+func GetArtistsByName(artistName string) ([]string, error) {
+	input := strings.ToLower(artistName)
+
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+
+	var artistNames []string
+	for _, a := range artists {
+		if strings.Contains(strings.ToLower(a.Name), input) {
+			artistNames = append(artistNames, a.Name)
+		}
+	}
+
+	if len(artistNames) == 0 {
+		return nil, ErrArtistNotFound
+	}
+
+	return artistNames, nil
+}

@@ -137,28 +137,24 @@ func MainMenu() {
 		numMembersContainer,
 	)
 
-	artistContainer := container.NewHBox()
-
-	overlay := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
+	artistSugesstion := container.NewVBox()
 
 	searchEntry.OnChanged = func(text string) {
-		artistContainer.RemoveAll()
-		overlay.RemoveAll()
-		art, err := data.GetArtistByName(text)
-		if err != nil {
-			fmt.Println("Problème")
+		artistSugesstion.RemoveAll()
+		mem, err := data.GetArtistByMember(text)
+		art, errr := data.GetArtistsByName(text)
+		if err != nil && errr != nil {
+			artistSugesstion.Add(widget.NewLabel(err.Error()))
 			return
 		}
-		img := data.FetchImage(art.Image)
-		img.FillMode = canvas.ImageFillContain
-		img.SetMinSize(fyne.NewSize(100, 100))
 		if text == "" {
-			artistContainer.RemoveAll()
-			overlay.RemoveAll()
+			artistSugesstion.RemoveAll()
 			return
 		}
-		overlay.Add(img)
-		artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", art.Name)))
+		for _, artist := range art {
+			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
+			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", mem)))
+		}
 	}
 
 	grid := container.NewGridWithRows(0)
@@ -192,6 +188,9 @@ func MainMenu() {
 	if count > 0 {
 		listeArtist.Add(grid)
 	}
+
+	overlay := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
+	artistContainer := container.NewHBox()
 
 	firstAlbumDateSliderLabel := widget.NewLabel("First album date: ")
 	// Years Slider
@@ -246,6 +245,7 @@ func MainMenu() {
 		titleContainer,
 		searchEntry,
 		searchButton,
+		artistSugesstion,
 		filters,
 		filtregroupecont,
 		careerStartingYearLabel,
