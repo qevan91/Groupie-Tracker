@@ -99,6 +99,8 @@ func MainMenu() {
 	if count > 0 {
 		listeArtist.Add(grid)
 	}
+
+	firstAlbumDateSliderLabel := widget.NewLabel("First album date: ")
 	// Years Slider
 	yearSlider := widget.NewSlider(0, 67)
 	yearSlider.Step = 1
@@ -125,17 +127,41 @@ func MainMenu() {
 
 	careerStartingYearLabel := widget.NewLabel("Career Starting Year: ")
 
-	hbox := container.NewHBox()
-	hbox.Add(careerStartingYearLabel)
-	hbox.Add(yearSliderValue)
+	// First album date Years
+	firstAlbumDateSlider := widget.NewSlider(0, 62)
+	firstAlbumDateSlider.Step = 1
+	firstAlbumDateSliderValue := widget.NewLabel("1962")
+	firstAlbumDateSlider.OnChanged = func(value float64) {
+		selectedFirstAlbumDate := int(value) + 1962
+		firstAlbumDateSliderValue.SetText(fmt.Sprintf("%d", selectedFirstAlbumDate))
+		artistContainer.RemoveAll()
+		overlay.RemoveAll()
+		artists, err := data.GetArtistsByFirstAlbumYear(selectedFirstAlbumDate)
+		if err != nil {
+			fmt.Println("Problème:", err)
+			return
+		}
+
+		for _, artist := range artists {
+			img := data.FetchImage(artist.Image)
+			img.FillMode = canvas.ImageFillContain
+			img.SetMinSize(fyne.NewSize(100, 100))
+			overlay.Add(img)
+			artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", artist.Name)))
+		}
+	}
 
 	content := container.NewVBox(
 		titleContainer,
 		buttonHome,
 		searchEntry,
 		searchButton,
+		careerStartingYearLabel,
+		yearSliderValue,
 		yearSlider,
-		hbox,
+		firstAlbumDateSliderLabel,
+		firstAlbumDateSliderValue,
+		firstAlbumDateSlider,
 		overlay,
 		artistContainer,
 		listeArtist,
@@ -146,3 +172,9 @@ func MainMenu() {
 	w.Resize(fyne.NewSize(800, 600))
 	w.ShowAndRun()
 }
+
+/*
+1973
+1967
+1963
+*/

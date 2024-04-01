@@ -12,6 +12,7 @@ import (
 var ErrArtistNotFound = errors.New("artist not found")
 var ErrArtistRelationsNotFound = errors.New("relation not found")
 var ErrNoArtistsForYear = errors.New("aucun artiste trouvé pour cette année")
+var ErrNoArtistsAlbumYears = errors.New("aucun album trouvé pour cette année")
 var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
@@ -317,14 +318,13 @@ func GetRelationsByID(artistID int) (*Relation, error) {
 	return nil, ErrArtistRelationsNotFound
 }
 
+// filtre artiste par carriere
 func GetArtistsByYear(year int) ([]Artist, error) {
-	// Récupère tous les artistes
 	artists, err := FetchArtists()
 	if err != nil {
 		return nil, err
 	}
 
-	// Filtrer les artistes pour l'année donnée
 	var filteredArtists []Artist
 	for _, artist := range artists {
 		if artist.CreationDate == year {
@@ -332,9 +332,35 @@ func GetArtistsByYear(year int) ([]Artist, error) {
 		}
 	}
 
-	// Vérifier si des artistes ont été trouvés pour l'année donnée
 	if len(filteredArtists) == 0 {
 		return nil, ErrNoArtistsForYear
+	}
+
+	return filteredArtists, nil
+}
+
+func GetArtistsByFirstAlbumYear(year int) ([]Artist, error) {
+	artists, err := FetchArtists()
+	if err != nil {
+		return nil, err
+	}
+
+	var filteredArtists []Artist
+
+	for _, artist := range artists {
+		albumYear, err := strconv.Atoi(strings.Split(artist.FirstAlbum, "-")[2])
+		if err != nil {
+			fmt.Println("Erreur de conversion de l'année de l'album:", err)
+			continue
+		}
+
+		if albumYear == year {
+			filteredArtists = append(filteredArtists, artist)
+		}
+	}
+
+	if len(filteredArtists) == 0 {
+		return nil, ErrNoArtistsAlbumYears
 	}
 
 	return filteredArtists, nil
