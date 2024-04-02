@@ -162,11 +162,12 @@ func MainMenu() {
 	listeArtist := container.NewVBox()
 
 	for _, artist := range artists {
+		art := artist
 		img := data.FetchImage(artist.Image)
 		img.FillMode = canvas.ImageFillContain
 		img.SetMinSize(fyne.NewSize(100, 100))
 		infoButton := widget.NewButton("", func() {
-			data.ShowArtistDetails(a, artist)
+			data.ShowArtistDetails(a, art)
 		})
 		infoButton.Importance = widget.LowImportance
 		infoButton.SetIcon(nil)
@@ -185,6 +186,7 @@ func MainMenu() {
 			grid = container.NewGridWithRows(0)
 		}
 	}
+
 	if count > 0 {
 		listeArtist.Add(grid)
 	}
@@ -269,6 +271,10 @@ func MainMenu() {
 				a.Settings().SetTheme(theme.DarkTheme())
 			}),
 
+			fyne.NewMenuItem("Default theme", func() {
+				a.Settings().SetTheme(theme.DefaultTheme())
+			}),
+
 			fyne.NewMenuItem("Light theme", func() {
 				a.Settings().SetTheme(theme.LightTheme())
 			}),
@@ -280,6 +286,10 @@ func MainMenu() {
 					w.SetFullScreen(true)
 				}
 			}),
+
+			fyne.NewMenuItem("Your Favoris", func() {
+				FavoriteGestion(w, data.Favoris)
+			}),
 		),
 		fyne.NewMenu("Home",
 			fyne.NewMenuItem("Home", func() {
@@ -288,6 +298,5 @@ func MainMenu() {
 		))
 
 	w.SetMainMenu(header)
-
 	w.ShowAndRun()
 }

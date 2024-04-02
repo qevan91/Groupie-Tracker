@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 
 	"gpo/data"
@@ -42,6 +44,23 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 
 	if artist != nil {
 
+		Favoris := widget.NewCheck("", nil)
+		Favoris.SetText("Favoris")
+
+		numMembersContainer := container.New(layout.NewHBoxLayout(),
+			Favoris,
+		)
+
+		Favoris.OnChanged = func(checked bool) {
+			if checked {
+				data.AddFavoris(artist.Name)
+				dialog.ShowInformation("Success", artist.Name+" has been added to your favorite list", w)
+			} else {
+				data.DeleteArtist(artist.Name)
+				dialog.ShowInformation("Success", artist.Name+" has been removed from your favorite list", w)
+			}
+		}
+
 		artistContainer := container.NewVBox(
 			widget.NewLabel(fmt.Sprintf("Name: %s", data.GetName())),
 			widget.NewLabel(fmt.Sprintf("Members: %v", data.GetMembers())),
@@ -49,7 +68,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			widget.NewLabel(fmt.Sprintf("First Album: %s", data.GetFirstAlbum())),
 			widget.NewLabel(fmt.Sprintf("Locations: %s", data.GetLocations())),
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", data.GetConcertDates())),
-			widget.NewLabel(fmt.Sprintf("Location: %v", relation)),
+			widget.NewLabel(fmt.Sprintf("Relations: %v", relation)),
 		)
 		container.NewCenter(artistContainer)
 		imgResource, err := fyne.LoadResourceFromURLString(data.GetImage())
@@ -74,6 +93,7 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		w.SetContent(container.NewVBox(
 			searchEntry,
 			searchButton,
+			numMembersContainer,
 			content,
 			artistContainer,
 		))

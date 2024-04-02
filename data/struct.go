@@ -17,6 +17,7 @@ var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
 var RelationList []Relation
+var Favoris []string
 
 type Location struct {
 	ID    int      `json:"id"`
@@ -377,4 +378,30 @@ func GetArtistsByName(artistName string) ([]string, error) {
 	}
 
 	return artistNames, nil
+}
+
+func GetFavoris() []string {
+	return Favoris
+}
+
+func AddFavoris(artistName string) {
+	if artistName != "" {
+		p := strings.Join(Favoris, "")
+		if strings.Contains(p, artistName) {
+			fmt.Println("Artiste déjà dans la liste")
+		} else {
+			Favoris = append(Favoris, artistName)
+		}
+	}
+}
+
+func DeleteArtist(artistName string) {
+	if artistName != "" {
+		for i, artist := range Favoris {
+			if artist == artistName {
+				Favoris = append(Favoris[:i], Favoris[i+1:]...)
+				return
+			}
+		}
+	}
 }
