@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -21,6 +22,8 @@ func MainMenu() {
 	w := a.NewWindow("Artist Details")
 
 	w.Resize(fyne.NewSize(1000, 500))
+
+	w.SetFullScreen(true)
 
 	artists, err := data.FetchArtists()
 	if err != nil {
@@ -45,7 +48,7 @@ func MainMenu() {
 		filtregroupecont.RemoveAll()
 		for _, group := range allGroups {
 			if len(group.Members) == num {
-				groupInfo := fmt.Sprintf("Nom du groupe : %s,", group.Name)
+				groupInfo := fmt.Sprintf("Name : %s,", group.Name)
 				img := data.FetchImage(group.Image)
 				img.FillMode = canvas.ImageFillContain
 				img.SetMinSize(fyne.NewSize(100, 100))
@@ -56,86 +59,19 @@ func MainMenu() {
 		}
 	}
 
-	numMembers1 := widget.NewCheck("1", nil)
-	numMembers2 := widget.NewCheck("2", nil)
-	numMembers3 := widget.NewCheck("3", nil)
-	numMembers4 := widget.NewCheck("4", nil)
-	numMembers5 := widget.NewCheck("5", nil)
-	numMembers6 := widget.NewCheck("6", nil)
-	numMembers7 := widget.NewCheck("7", nil)
-	numMembers8 := widget.NewCheck("8", nil)
+	numMembersContainer := container.New(layout.NewHBoxLayout())
 
-	numMembersContainer := container.New(layout.NewHBoxLayout(),
-		numMembers1, numMembers2, numMembers3, numMembers4, numMembers5, numMembers6, numMembers7, numMembers8,
-	)
-
-	numMembers1.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 1)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
+	for i := 1; i <= 8; i++ {
+		num := i
+		check := widget.NewCheck(fmt.Sprintf("%d", num), func(checked bool) {
+			if checked {
+				updateArtistDisplay(artists, num)
+			} else {
+				filtregroupecont.RemoveAll()
+			}
+		})
+		numMembersContainer.Add(check)
 	}
-
-	numMembers2.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 2)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers3.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 3)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers4.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 4)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers5.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 5)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers6.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 6)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers7.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 7)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	numMembers8.OnChanged = func(checked bool) {
-		if checked {
-			updateArtistDisplay(artists, 8)
-		} else {
-			filtregroupecont.RemoveAll()
-		}
-	}
-
-	filters := container.New(layout.NewGridLayout(2),
-		numMembersContainer,
-	)
 
 	artistSugesstion := container.NewVBox()
 
@@ -153,7 +89,9 @@ func MainMenu() {
 		}
 		for _, artist := range art {
 			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
-			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", mem)))
+		}
+		for _, member := range mem {
+			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", member)))
 		}
 	}
 
@@ -167,7 +105,7 @@ func MainMenu() {
 		img.FillMode = canvas.ImageFillContain
 		img.SetMinSize(fyne.NewSize(100, 100))
 		infoButton := widget.NewButton("", func() {
-			data.ShowArtistDetails(a, art)
+			PerformPostJsonRequest(w, art.Name)
 		})
 		infoButton.Importance = widget.LowImportance
 		infoButton.SetIcon(nil)
@@ -191,7 +129,7 @@ func MainMenu() {
 		listeArtist.Add(grid)
 	}
 
-	overlay := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
+	overlayfilter := fyne.NewContainerWithLayout(layout.NewBorderLayout(nil, nil, nil, nil))
 	artistContainer := container.NewHBox()
 
 	firstAlbumDateSliderLabel := widget.NewLabel("First album date: ")
@@ -203,7 +141,7 @@ func MainMenu() {
 		selectedYear := int(value) + 1957
 		yearSliderValue.SetText(fmt.Sprintf("%d", selectedYear))
 		artistContainer.RemoveAll()
-		overlay.RemoveAll()
+		overlayfilter.RemoveAll()
 		artists, err := data.GetArtistsByYear(selectedYear)
 		if err != nil {
 			return
@@ -213,7 +151,7 @@ func MainMenu() {
 			img := data.FetchImage(artist.Image)
 			img.FillMode = canvas.ImageFillContain
 			img.SetMinSize(fyne.NewSize(100, 100))
-			overlay.Add(img)
+			overlayfilter.Add(img)
 			artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", artist.Name)))
 		}
 	}
@@ -228,7 +166,7 @@ func MainMenu() {
 		selectedFirstAlbumDate := int(value) + 1962
 		firstAlbumDateSliderValue.SetText(fmt.Sprintf("%d", selectedFirstAlbumDate))
 		artistContainer.RemoveAll()
-		overlay.RemoveAll()
+		overlayfilter.RemoveAll()
 		artists, err := data.GetArtistsByFirstAlbumYear(selectedFirstAlbumDate)
 		if err != nil {
 			return
@@ -238,7 +176,7 @@ func MainMenu() {
 			img := data.FetchImage(artist.Image)
 			img.FillMode = canvas.ImageFillContain
 			img.SetMinSize(fyne.NewSize(100, 100))
-			overlay.Add(img)
+			overlayfilter.Add(img)
 			artistContainer.Add(widget.NewLabel(fmt.Sprintf("Name: %s", artist.Name)))
 		}
 	}
@@ -248,7 +186,7 @@ func MainMenu() {
 		searchEntry,
 		searchButton,
 		artistSugesstion,
-		filters,
+		numMembersContainer,
 		filtregroupecont,
 		careerStartingYearLabel,
 		yearSliderValue,
@@ -256,7 +194,7 @@ func MainMenu() {
 		firstAlbumDateSliderLabel,
 		firstAlbumDateSliderValue,
 		firstAlbumDateSlider,
-		overlay,
+		overlayfilter,
 		artistContainer,
 		listeArtist,
 	)
@@ -280,15 +218,15 @@ func MainMenu() {
 			}),
 
 			fyne.NewMenuItem("Full Screen", func() {
-				if w.FullScreen() == true {
-					w.SetFullScreen(false)
-				} else {
-					w.SetFullScreen(true)
-				}
+				w.SetFullScreen(!w.FullScreen())
 			}),
 
-			fyne.NewMenuItem("Your Favoris", func() {
+			fyne.NewMenuItem("favorites list", func() {
 				FavoriteGestion(w, data.Favoris)
+			}),
+
+			fyne.NewMenuItem("ShortCut", func() {
+				data.Shortcut(w)
 			}),
 		),
 		fyne.NewMenu("Home",
@@ -298,5 +236,11 @@ func MainMenu() {
 		))
 
 	w.SetMainMenu(header)
+
+	AltF4 := &desktop.CustomShortcut{KeyName: fyne.KeyF4, Modifier: fyne.KeyModifierAlt}
+	w.Canvas().AddShortcut(AltF4, func(shortcut fyne.Shortcut) {
+		os.Exit(0)
+	})
+
 	w.ShowAndRun()
 }

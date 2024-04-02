@@ -2,9 +2,11 @@ package app
 
 import (
 	"fmt"
+	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -23,6 +25,28 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			searchTerm := searchEntry.Text
 			PerformPostJsonRequest(w, searchTerm)
 		})
+
+		artistSugesstion := container.NewVBox()
+
+		searchEntry.OnChanged = func(text string) {
+			artistSugesstion.RemoveAll()
+			mem, err := data.GetArtistByMember(text)
+			art, errr := data.GetArtistsByName(text)
+			if err != nil && errr != nil {
+				artistSugesstion.Add(widget.NewLabel(err.Error()))
+				return
+			}
+			if text == "" {
+				artistSugesstion.RemoveAll()
+				return
+			}
+			for _, artist := range art {
+				artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
+			}
+			for _, member := range mem {
+				artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", member)))
+			}
+		}
 
 		if err == data.ErrArtistNotFound {
 			w.SetContent(container.NewVBox(
@@ -88,6 +112,48 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		searchButton := widget.NewButton("Recherche", func() {
 			searchTerm := searchEntry.Text
 			PerformPostJsonRequest(w, searchTerm)
+		})
+
+		artistSugesstion := container.NewVBox()
+
+		searchEntry.OnChanged = func(text string) {
+			artistSugesstion.RemoveAll()
+			mem, err := data.GetArtistByMember(text)
+			art, errr := data.GetArtistsByName(text)
+			if err != nil && errr != nil {
+				artistSugesstion.Add(widget.NewLabel(err.Error()))
+				return
+			}
+			if text == "" {
+				artistSugesstion.RemoveAll()
+				return
+			}
+			for _, artist := range art {
+				artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
+			}
+			for _, member := range mem {
+				artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", member)))
+			}
+		}
+
+		ctrlL := &desktop.CustomShortcut{KeyName: fyne.KeyL, Modifier: fyne.KeyModifierControl}
+		w.Canvas().AddShortcut(ctrlL, func(shortcut fyne.Shortcut) {
+			Favoris.SetChecked(!Favoris.Checked)
+		})
+
+		ctrlF := &desktop.CustomShortcut{KeyName: fyne.KeyF, Modifier: fyne.KeyModifierControl}
+		w.Canvas().AddShortcut(ctrlF, func(shortcut fyne.Shortcut) {
+			w.SetFullScreen(true)
+		})
+
+		ctrlE := &desktop.CustomShortcut{KeyName: fyne.KeyE, Modifier: fyne.KeyModifierControl}
+		w.Canvas().AddShortcut(ctrlE, func(shortcut fyne.Shortcut) {
+			w.SetFullScreen(false)
+		})
+
+		AltF4 := &desktop.CustomShortcut{KeyName: fyne.KeyF4, Modifier: fyne.KeyModifierAlt}
+		w.Canvas().AddShortcut(AltF4, func(shortcut fyne.Shortcut) {
+			os.Exit(0)
 		})
 
 		w.SetContent(container.NewVBox(
