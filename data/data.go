@@ -1,10 +1,14 @@
 package data
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"image"
 	"net/http"
+	"os"
+	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -70,4 +74,36 @@ func ShowArtistDetails(a fyne.App, artist Artist) {
 	info := fmt.Sprintf("Name: %s\nMembers: %v\nFirst Album: %s\nCreation Date: %d", artist.Name, artist.Members, artist.FirstAlbum, artist.CreationDate)
 	w.SetContent(widget.NewLabel(info))
 	w.Show()
+}
+
+func OpenLinkByID(id int) {
+	file, err := os.Open("SpotifySongs.txt")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	counter := 0
+	for scanner.Scan() {
+		if strings.HasPrefix(scanner.Text(), "https://open.spotify.com/intl-fr/track/") {
+			counter++
+			if counter == Art.ID {
+				err := exec.Command("cmd", "/c", "start", scanner.Text()).Run()
+				if err != nil {
+					fmt.Println("Error during command execution:", err)
+					return
+				}
+				return
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	fmt.Println("ID not found")
 }

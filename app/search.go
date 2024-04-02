@@ -71,8 +71,11 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		Favoris := widget.NewCheck("", nil)
 		Favoris.SetText("Favoris")
 
+		Music := widget.NewCheck("", nil)
+		Music.SetText("Listen to their most popular music")
+
 		numMembersContainer := container.New(layout.NewHBoxLayout(),
-			Favoris,
+			Favoris, Music,
 		)
 
 		Favoris.OnChanged = func(checked bool) {
@@ -82,6 +85,12 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			} else {
 				data.DeleteArtist(artist.Name)
 				dialog.ShowInformation("Success", artist.Name+" has been removed from your favorite list", w)
+			}
+		}
+
+		Music.OnChanged = func(checked bool) {
+			if checked {
+				data.OpenLinkByID(artist.ID)
 			}
 		}
 

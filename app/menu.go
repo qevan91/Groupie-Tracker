@@ -162,9 +162,9 @@ func MainMenu() {
 	// First album date Years
 	firstAlbumDateSlider := widget.NewSlider(0, 62)
 	firstAlbumDateSlider.Step = 1
-	firstAlbumDateSliderValue := widget.NewLabel("1960")
+	firstAlbumDateSliderValue := widget.NewLabel("1962")
 	firstAlbumDateSlider.OnChanged = func(value float64) {
-		selectedFirstAlbumDate := int(value) + 1960
+		selectedFirstAlbumDate := int(value) + 1962
 		firstAlbumDateSliderValue.SetText(fmt.Sprintf("%d", selectedFirstAlbumDate))
 		artistContainer.RemoveAll()
 		overlayfilter.RemoveAll()
