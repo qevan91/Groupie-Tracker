@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"net/url"
 
 	"gpo/data"
 	"image/color"
@@ -161,9 +162,9 @@ func MainMenu() {
 	// First album date Years
 	firstAlbumDateSlider := widget.NewSlider(0, 62)
 	firstAlbumDateSlider.Step = 1
-	firstAlbumDateSliderValue := widget.NewLabel("1962")
+	firstAlbumDateSliderValue := widget.NewLabel("1960")
 	firstAlbumDateSlider.OnChanged = func(value float64) {
-		selectedFirstAlbumDate := int(value) + 1962
+		selectedFirstAlbumDate := int(value) + 1960
 		firstAlbumDateSliderValue.SetText(fmt.Sprintf("%d", selectedFirstAlbumDate))
 		artistContainer.RemoveAll()
 		overlayfilter.RemoveAll()
@@ -233,7 +234,19 @@ func MainMenu() {
 			fyne.NewMenuItem("Home", func() {
 				w.SetContent(scroll)
 			}),
-		))
+		),
+		fyne.NewMenu("Spotify",
+			fyne.NewMenuItem("Spotify Embeds", func() {
+				link, _ := url.Parse("https://developer.spotify.com/documentation/embeds")
+				_ = a.OpenURL(link)
+			}),
+
+			fyne.NewMenuItem("Spotify", func() {
+				Spotifylink, _ := url.Parse("https://open.spotify.com/intl-fr")
+				_ = a.OpenURL(Spotifylink)
+			}),
+		),
+	)
 
 	w.SetMainMenu(header)
 
