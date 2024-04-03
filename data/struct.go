@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,6 +24,10 @@ type Location struct {
 	ID    int      `json:"id"`
 	Loc   []string `json:"locations"`
 	Dates string   `json:"dates"`
+}
+type IndexDate struct {
+	ID    int      `json:"id"`
+	Dates []string `json:"dates"`
 }
 
 type Artist struct {
@@ -162,7 +167,20 @@ func GetRelation() string {
 }
 
 func GetConcertDates() string {
-	return Art.ConcertDates
+	urlDate := fmt.Sprintf("https://groupietrackers.herokuapp.com/api/dates/%d", Art.ID)
+
+	dates, err := fetchDates(urlDate)
+	if err != nil {
+		fmt.Println("Error fetching dates:", err)
+
+	}
+
+	for _, d := range dates {
+		for _, concertDate := range d.Dates {
+			fmt.Printf("Artist ID: %d, Date: %s\n", Art.ID, concertDate)
+		}
+	}
+	return "ab"
 }
 
 func GetArtists() ([]Artist, error) {
@@ -194,4 +212,25 @@ func GetDateLocations() map[string][]string {
 		return Rel.DatesLocations
 	}
 	return Rel.DatesLocations
+}
+
+func fetchDates(url string) ([]IndexDate, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var dates []IndexDate
+	err = json.Unmarshal(body, &dates)
+	if err != nil {
+		return nil, err
+	}
+
+	return dates, nil
 }
