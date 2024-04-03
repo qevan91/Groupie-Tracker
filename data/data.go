@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Transform a link in image
 func FetchImage(url string) *canvas.Image {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -32,6 +33,7 @@ func FetchImage(url string) *canvas.Image {
 	return canvas.NewImageFromImage(img)
 }
 
+// Recovery the api Artist
 func FetchArtists() ([]Artist, error) {
 	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/artists")
 	if err != nil {
@@ -47,6 +49,7 @@ func FetchArtists() ([]Artist, error) {
 	return artists, nil
 }
 
+// Recovery the api Relation
 func FetchRelations() ([]Relation, error) {
 	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
 	if err != nil {
@@ -76,7 +79,9 @@ func ShowArtistDetails(a fyne.App, artist Artist) {
 	w.Show()
 }
 
+// Open a link
 func OpenLinkByID(id int) {
+	// Open the file containing Spotify songs
 	file, err := os.Open("SpotifySongs.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -84,12 +89,15 @@ func OpenLinkByID(id int) {
 	}
 	defer file.Close()
 
+	// Create a scanner to read the file line by line
 	scanner := bufio.NewScanner(file)
 	counter := 0
+	// Cheak each line in the file
 	for scanner.Scan() {
 		if strings.HasPrefix(scanner.Text(), "https://open.spotify.com/intl-fr/track/") {
 			counter++
 			if counter == Art.ID {
+				// Execute a command to open the Spotify link
 				err := exec.Command("cmd", "/c", "start", scanner.Text()).Run()
 				if err != nil {
 					fmt.Println("Error during command execution:", err)
@@ -100,10 +108,39 @@ func OpenLinkByID(id int) {
 		}
 	}
 
+	// Check for any scanning errors
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)
 		return
 	}
 
 	fmt.Println("ID not found")
+}
+
+// Add an artist to the favorites list
+func AddFavoris(artistName string) {
+	if artistName != "" {
+		p := strings.Join(Favoris, "")
+		// Check if artist is already in the list of favorites
+		if strings.Contains(p, artistName) {
+			fmt.Println("Artist already in the list")
+		} else {
+			// Add artist to the list of favorites
+			Favoris = append(Favoris, artistName)
+		}
+	}
+}
+
+// DeleteArtist removes an artist from the list of favorites.
+func DeleteArtist(artistName string) {
+	if artistName != "" {
+		// Iterate through the list of favorites
+		for i, artist := range Favoris {
+			if artist == artistName {
+				// Remove artist
+				Favoris = append(Favoris[:i], Favoris[i+1:]...)
+				return
+			}
+		}
+	}
 }
