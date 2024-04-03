@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -188,14 +187,14 @@ func GetRelation() string {
 	i := 1
 	for k, v := range rel.DatesLocations {
 		if len(v) <= 1 {
-			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, ConvertStringPropper(k), v[0])
+			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, strings.ToUpper(k), v[0])
 			i++
 		} else {
 			stringup := ""
 			for i := 0; i < len(v); i++ {
 				stringup = fmt.Sprintf("%s, %s", stringup, v[i])
 			}
-			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, ConvertStringPropper(k), stringup)
+			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, strings.ToUpper(k), stringup)
 			i++
 		}
 	}
@@ -235,15 +234,4 @@ func GetDateLocations() map[string][]string {
 		return Rel.DatesLocations
 	}
 	return Rel.DatesLocations
-}
-
-func ConvertStringPropper(input string) string {
-	// Convertir en majuscules
-	upper := strings.ToUpper(input)
-
-	// Supprimer les caractères spéciaux sauf les espaces
-	regex := regexp.MustCompile("[^a-zA-Z0-9 ]+")
-	result := regex.ReplaceAllString(upper, "")
-
-	return result
 }
