@@ -20,14 +20,19 @@ var Rel *Relation
 var RelationList []Relation
 var Favoris []string
 
-// Struct of location
+type IndexDate struct {
+	ID    int      `json:"id"`
+	Dates []string `json:"dates"`
+}
+
+// Struct of location us as implementation of the Location interface
 type Location struct {
 	ID    int      `json:"id"`
 	Loc   []string `json:"locations"`
 	Dates string   `json:"dates"`
 }
 
-// Struct of the artist
+// Struct of the artist use as implementation of the Artist interface
 type Artist struct {
 	ID           int      `json:"id"`
 	Image        string   `json:"image"`
@@ -40,12 +45,13 @@ type Artist struct {
 	Relation     string   `json:"relations"`
 }
 
-// Struct of relation
+// Struct of relation use as implementation of the Relation interface
 type Relation struct {
 	ID             int                 `json:"id"`
 	DatesLocations map[string][]string `json:"datesLocations"`
 }
 
+// Struct of the query use as implementation of the Query interface
 type Query struct {
 	Type     string    `json:"type"`
 	Features []Feature `json:"features"`
@@ -206,7 +212,29 @@ func GetRelation() string {
 }
 
 func GetConcertDates() string {
-	return Art.ConcertDates
+	// URL pour récupérer les dates
+	urlDate := fmt.Sprintf("https://groupietrackers.herokuapp.com/api/dates/%d", Art.ID)
+
+	// Effectuer la requête HTTP
+	response, err := http.Get(urlDate)
+	if err != nil {
+		fmt.Println("Erreur lors de la requête:", err)
+	}
+	defer response.Body.Close()
+
+	// Décoder la réponse JSON
+	var dates IndexDate
+	if err := json.NewDecoder(response.Body).Decode(&dates); err != nil {
+		fmt.Println(err)
+	}
+
+	// Formatter les dates dans une chaîne de caractères
+	var returnString string
+	for _, d := range dates.Dates {
+		returnString += fmt.Sprintf("\n%s", d)
+	}
+
+	return returnString
 }
 
 func GetArtists() ([]Artist, error) {
