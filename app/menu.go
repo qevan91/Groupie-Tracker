@@ -204,18 +204,17 @@ func MainMenu() {
 	w.SetContent(scroll)
 
 	header := fyne.NewMainMenu(
-
 		fyne.NewMenu("Settings",
 			fyne.NewMenuItem("Dark theme", func() {
-				a.Settings().SetTheme(theme.DarkTheme())
+				fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
 			}),
 
 			fyne.NewMenuItem("Default theme", func() {
-				a.Settings().SetTheme(theme.DefaultTheme())
+				fyne.CurrentApp().Settings().SetTheme(theme.DefaultTheme())
 			}),
 
 			fyne.NewMenuItem("Light theme", func() {
-				a.Settings().SetTheme(theme.LightTheme())
+				fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
 			}),
 
 			fyne.NewMenuItem("Full Screen", func() {
@@ -230,6 +229,23 @@ func MainMenu() {
 				data.Shortcut(w)
 			}),
 		),
+		fyne.NewMenu("Login",
+			fyne.NewMenuItem("Login", func() {
+				data.Login(w)
+			}),
+			fyne.NewMenuItem("Sign", func() {
+				// Récupérer les valeurs des champs de saisie depuis votre package data
+				var username = "utilisateur"
+				var password = "motdepasse"
+				err := data.CreateUser(username, password)
+				if err != nil {
+					fmt.Println("Erreur lors de la création de l'utilisateur:", err)
+				} else {
+					fmt.Println("Utilisateur créé avec succès!")
+				}
+
+			}),
+		),
 		fyne.NewMenu("Home",
 			fyne.NewMenuItem("Home", func() {
 				w.SetContent(scroll)
@@ -238,12 +254,12 @@ func MainMenu() {
 		fyne.NewMenu("Spotify",
 			fyne.NewMenuItem("Spotify Embeds", func() {
 				link, _ := url.Parse("https://developer.spotify.com/documentation/embeds")
-				_ = a.OpenURL(link)
+				_ = fyne.CurrentApp().OpenURL(link)
 			}),
 
 			fyne.NewMenuItem("Spotify", func() {
 				Spotifylink, _ := url.Parse("https://open.spotify.com/intl-fr")
-				_ = a.OpenURL(Spotifylink)
+				_ = fyne.CurrentApp().OpenURL(Spotifylink)
 			}),
 		),
 	)
@@ -257,3 +273,7 @@ func MainMenu() {
 
 	w.ShowAndRun()
 }
+
+/*
+
+ */

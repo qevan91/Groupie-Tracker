@@ -1,6 +1,8 @@
 package main
 
-import "gpo/app"
+import (
+	"gpo/app"
+)
 
 func main() {
 	app.MainMenu()
