@@ -158,7 +158,24 @@ func GetLocations() string {
 }
 
 func GetRelation() string {
-	return Art.Relation
+	url := fmt.Sprintf("https://groupietrackers.herokuapp.com/api/relation/%d", Art.ID)
+
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Erreur lors de la requête:", err)
+	}
+	defer response.Body.Close()
+
+	var rel Relation
+	if err := json.NewDecoder(response.Body).Decode(&rel); err != nil {
+		fmt.Println(err)
+	}
+
+	returnString := ""
+	for k, v := range rel.DatesLocations {
+		returnString += fmt.Sprintf("%s : %s\n", k, v)
+	}
+	return "\n" + returnString
 }
 
 func GetConcertDates() string {

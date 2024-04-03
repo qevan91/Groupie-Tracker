@@ -61,11 +61,6 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		return
 	}
 
-	relation, err := data.GetRelationsByID(data.GetArtisteID())
-	if err != nil {
-		fmt.Println("Erreur lors de la récupération des relations:", err)
-	}
-
 	if artist != nil {
 
 		Favoris := widget.NewCheck("", nil)
@@ -99,9 +94,9 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 			widget.NewLabel(fmt.Sprintf("Members: %v", data.GetMembers())),
 			widget.NewLabel(fmt.Sprintf("Creation Date: %v", data.GetCreationDate())),
 			widget.NewLabel(fmt.Sprintf("First Album: %s", data.GetFirstAlbum())),
-			widget.NewLabel(fmt.Sprintf("Locations: %s", data.GetLocations())),
+			widget.NewLabel(fmt.Sprintf("Locations of the Concerts: %s", data.GetLocations())),
 			widget.NewLabel(fmt.Sprintf("Concert Dates: %s", data.GetConcertDates())),
-			widget.NewLabel(fmt.Sprintf("Relations: %v", relation)),
+			widget.NewLabel(fmt.Sprintf("Relations: %v", data.GetRelation())),
 		)
 		container.NewCenter(artistContainer)
 		imgResource, err := fyne.LoadResourceFromURLString(data.GetImage())
