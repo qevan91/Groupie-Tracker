@@ -166,7 +166,11 @@ func GetLocations() string {
 		}
 		returnTab = append(returnTab, datas.Features[0].Center)
 	}
-	return float64ArrayToString(returnTab)
+	returnString := ""
+	for i := 0; i < len(returnTab); i++ {
+		returnString += fmt.Sprintf("\nDate %d: %f, %f", i+1, returnTab[i][0], returnTab[i][1])
+	}
+	return returnString
 }
 
 func GetRelation() string {
