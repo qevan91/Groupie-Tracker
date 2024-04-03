@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -13,18 +14,21 @@ var ErrArtistNotFound = errors.New("artist not found")
 var ErrArtistRelationsNotFound = errors.New("relation not found")
 var ErrNoArtistsForYear = errors.New("aucun artiste trouvé pour cette année")
 var ErrNoArtistsAlbumYears = errors.New("aucun album trouvé pour cette année")
+var ErrNoArtistsCreationYears = errors.New("aucun artist trouvé pour cette année")
 var Art *Artist
 var ArtistList []Artist
 var Rel *Relation
 var RelationList []Relation
 var Favoris []string
 
+// Struct of location
 type Location struct {
 	ID    int      `json:"id"`
 	Loc   []string `json:"locations"`
 	Dates string   `json:"dates"`
 }
 
+// Struct of the artist
 type Artist struct {
 	ID           int      `json:"id"`
 	Image        string   `json:"image"`
@@ -37,6 +41,7 @@ type Artist struct {
 	Relation     string   `json:"relations"`
 }
 
+// Struct of relation
 type Relation struct {
 	ID             int                 `json:"id"`
 	DatesLocations map[string][]string `json:"datesLocations"`
@@ -84,6 +89,14 @@ type Context struct {
 	Wikidata  string `json:"wikidata,omitempty"`
 	ShortCode string `json:"short_code,omitempty"`
 	Text      string `json:"text,omitempty"`
+}
+
+// Struct for Spotify
+type Track struct {
+	Name    string
+	Artists []struct {
+		Name string
+	}
 }
 
 func float64ArrayToString(arr [][]float64) string {
@@ -140,7 +153,7 @@ func GetLocations() string {
 	}
 	var returnTab [][]float64
 	for _, l := range loc.Loc {
-		// Construction de l'URL de requête
+		// Construction of the request URL
 		url := fmt.Sprintf("https://api.mapbox.com/geocoding/v5/mapbox.places/%s.json?access_token=%s", l, apiKey)
 		response, err := http.Get(url)
 		if err != nil {
@@ -172,10 +185,21 @@ func GetRelation() string {
 	}
 
 	returnString := ""
+	i := 1
 	for k, v := range rel.DatesLocations {
-		returnString += fmt.Sprintf("%s : %s\n", k, v)
+		if len(v) <= 1 {
+			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, ConvertStringPropper(k), v[0])
+			i++
+		} else {
+			stringup := ""
+			for i := 0; i < len(v); i++ {
+				stringup = fmt.Sprintf("%s, %s", stringup, v[i])
+			}
+			returnString += fmt.Sprintf("Date %d : "+"%s : %s\n", i, ConvertStringPropper(k), stringup)
+			i++
+		}
 	}
-	return "\n" + returnString
+	return "\n" + returnString + "\n" + "Don't miss it if you can still catch it !"
 }
 
 func GetConcertDates() string {
@@ -211,4 +235,15 @@ func GetDateLocations() map[string][]string {
 		return Rel.DatesLocations
 	}
 	return Rel.DatesLocations
+}
+
+func ConvertStringPropper(input string) string {
+	// Convertir en majuscules
+	upper := strings.ToUpper(input)
+
+	// Supprimer les caractères spéciaux sauf les espaces
+	regex := regexp.MustCompile("[^a-zA-Z0-9 ]+")
+	result := regex.ReplaceAllString(upper, "")
+
+	return result
 }

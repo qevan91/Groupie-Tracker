@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 
 	"gpo/data"
 	"image/color"
@@ -19,27 +20,33 @@ import (
 )
 
 func MainMenu() {
+	// Create the app
 	a := app.New()
 	w := a.NewWindow("Artist Details")
 
 	w.Resize(fyne.NewSize(1000, 500))
 
+	// Put in full screen
 	w.SetFullScreen(true)
 
+	// Fetch list of artists
 	artists, err := data.FetchArtists()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Erreur lors de la récupération des artistes: %v\n", err)
 		return
 	}
 
+	// Display a title
 	title := canvas.NewText("Groupie Tracker", color.White)
 	title.TextSize = 20
 	titleContainer := container.NewCenter(title)
 
 	searchEntry := widget.NewEntry()
 
-	searchButton := widget.NewButton("Recherche", func() {
+	// Validate input
+	searchButton := widget.NewButton("Search", func() {
 		searchTerm := searchEntry.Text
+		// Redirect to the search page
 		PerformPostJsonRequest(w, searchTerm)
 	})
 
@@ -61,11 +68,12 @@ func MainMenu() {
 	}
 
 	numMembersContainer := container.New(layout.NewHBoxLayout())
-
+	// Create check box
 	for i := 1; i <= 8; i++ {
 		num := i
 		check := widget.NewCheck(fmt.Sprintf("%d", num), func(checked bool) {
 			if checked {
+				// Display the artist with the number of member
 				updateArtistDisplay(artists, num)
 			} else {
 				filtregroupecont.RemoveAll()
@@ -74,32 +82,68 @@ func MainMenu() {
 		numMembersContainer.Add(check)
 	}
 
-	artistSugesstion := container.NewVBox()
+	artistSuggestion := container.NewVBox()
 
+	// Suggestion
 	searchEntry.OnChanged = func(text string) {
-		artistSugesstion.RemoveAll()
-		mem, err := data.GetArtistByMember(text)
-		art, errr := data.GetArtistsByName(text)
-		if err != nil && errr != nil {
-			artistSugesstion.Add(widget.NewLabel(err.Error()))
-			return
-		}
+		artistSuggestion.RemoveAll()
+
 		if text == "" {
-			artistSugesstion.RemoveAll()
 			return
 		}
-		for _, artist := range art {
-			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
+
+		// Try to convert text into a number (year or creation year)
+		year, err := strconv.Atoi(text)
+		if err == nil {
+			// Search for artists with the first album in the given year
+			FirstAlbArtists, err := data.GetArtistsByFirstAlbumYear(year)
+			if err != nil {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Error fetching artists for year %d: %v", year, err)))
+				return
+			}
+			for _, artist := range FirstAlbArtists {
+				// Display the year and the name of the artist
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Artist with first album in %d: %s", year, artist.Name)))
+			}
+
+			// Search for artists created in the given year
+			suggestedArtists, err := data.GetArtistsByCreationDate(year)
+			if err != nil {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Error fetching artists for creation year %d: %v", year, err)))
+				return
+			}
+			for _, artist := range suggestedArtists {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Artist created in %d: %s", year, artist.Name)))
+			}
+		} else {
+			// If the text is neither a number nor a creation year,
+			// show suggestions based on artist names and members
+			mem, err := data.GetArtistByMember(text)
+			if err != nil {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Error: %v", err)))
+			}
+
+			art, err := data.GetArtistsByName(text)
+			if err != nil {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Error: %v", err)))
+			}
+
+			for _, artist := range art {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Artist name: %v", artist)))
+			}
+
+			for _, member := range mem {
+				artistSuggestion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", member)))
+			}
 		}
-		for _, member := range mem {
-			artistSugesstion.Add(widget.NewLabel(fmt.Sprintf("Member name: %v", member)))
-		}
+
 	}
 
 	grid := container.NewGridWithRows(0)
 	count := 0
 	listeArtist := container.NewVBox()
 
+	// Display all the artist
 	for _, artist := range artists {
 		art := artist
 		img := data.FetchImage(artist.Image)
@@ -186,7 +230,7 @@ func MainMenu() {
 		titleContainer,
 		searchEntry,
 		searchButton,
-		artistSugesstion,
+		artistSuggestion,
 		numMembersContainer,
 		filtregroupecont,
 		careerStartingYearLabel,
@@ -200,11 +244,12 @@ func MainMenu() {
 		listeArtist,
 	)
 
+	// Incorporates a scroll
 	scroll := container.NewScroll(content)
 	w.SetContent(scroll)
 
+	// Create a header
 	header := fyne.NewMainMenu(
-
 		fyne.NewMenu("Settings",
 			fyne.NewMenuItem("Dark theme", func() {
 				a.Settings().SetTheme(theme.DarkTheme())
@@ -219,41 +264,80 @@ func MainMenu() {
 			}),
 
 			fyne.NewMenuItem("Full Screen", func() {
+				// Put on or take off the full screen
 				w.SetFullScreen(!w.FullScreen())
 			}),
 
 			fyne.NewMenuItem("favorites list", func() {
+				// Redirect to favotites list page
 				FavoriteGestion(w, data.Favoris)
 			}),
 
 			fyne.NewMenuItem("ShortCut", func() {
-				data.Shortcut(w)
+				// Redirect to Shortcut page
+				Shortcut(w)
+			}),
+		),
+		fyne.NewMenu("Login",
+			fyne.NewMenuItem("Login", func() {
+				data.Login(w)
+			}),
+			fyne.NewMenuItem("Sign", func() {
+				// Récupérer les valeurs des champs de saisie depuis votre package data
+				var username = "utilisateur"
+				var password = "motdepasse"
+				err := data.CreateUser(username, password)
+				if err != nil {
+					fmt.Println("Erreur lors de la création de l'utilisateur:", err)
+				} else {
+					fmt.Println("Utilisateur créé avec succès!")
+				}
+
 			}),
 		),
 		fyne.NewMenu("Home",
 			fyne.NewMenuItem("Home", func() {
+				// Display Mainmenu
 				w.SetContent(scroll)
 			}),
 		),
 		fyne.NewMenu("Spotify",
 			fyne.NewMenuItem("Spotify Embeds", func() {
+				// Open link of spotify embeds documentation
 				link, _ := url.Parse("https://developer.spotify.com/documentation/embeds")
-				_ = a.OpenURL(link)
+				_ = fyne.CurrentApp().OpenURL(link)
 			}),
 
 			fyne.NewMenuItem("Spotify", func() {
+				// Open Spotify
 				Spotifylink, _ := url.Parse("https://open.spotify.com/intl-fr")
-				_ = a.OpenURL(Spotifylink)
+				_ = fyne.CurrentApp().OpenURL(Spotifylink)
 			}),
 		),
 	)
 
 	w.SetMainMenu(header)
 
+	// Shortcut
+
 	AltF4 := &desktop.CustomShortcut{KeyName: fyne.KeyF4, Modifier: fyne.KeyModifierAlt}
 	w.Canvas().AddShortcut(AltF4, func(shortcut fyne.Shortcut) {
 		os.Exit(0)
 	})
 
+	ctrlF := &desktop.CustomShortcut{KeyName: fyne.KeyF, Modifier: fyne.KeyModifierControl}
+	w.Canvas().AddShortcut(ctrlF, func(shortcut fyne.Shortcut) {
+		w.SetFullScreen(true)
+	})
+
+	ctrlE := &desktop.CustomShortcut{KeyName: fyne.KeyE, Modifier: fyne.KeyModifierControl}
+	w.Canvas().AddShortcut(ctrlE, func(shortcut fyne.Shortcut) {
+		w.SetFullScreen(false)
+	})
+
 	w.ShowAndRun()
 }
+
+/*
+
+ */
