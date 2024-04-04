@@ -283,10 +283,8 @@ func MainMenu() {
 				data.Login(w)
 			}),
 			fyne.NewMenuItem("Sign", func() {
-				// Récupérer les valeurs des champs de saisie depuis votre package data
-				var username = "utilisateur"
-				var password = "motdepasse"
-				err := data.CreateUser(username, password)
+				data.Signup(w, widget.NewEntry(), widget.NewEntry(), widget.NewLabel(""))
+				err := data.CreateUser(widget.NewEntry().Text, widget.NewEntry().Text, data.Favoris)
 				if err != nil {
 					fmt.Println("Erreur lors de la création de l'utilisateur:", err)
 				} else {

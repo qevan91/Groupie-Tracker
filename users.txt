@@ -1,1 +1,2 @@
-Username: utilisateur, Password: motdepasse
+Username: , Password: , favorite List: [Queen]
+Username: test, Password: test, favorite List: [Queen]

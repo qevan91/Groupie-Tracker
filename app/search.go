@@ -183,12 +183,6 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 				os.Exit(1)
 			}
 
-			// Processing results
-			fmt.Println("Top tracks for artist:", artistID)
-			for _, track := range tracks {
-				fmt.Println(track.Name)
-			}
-
 			// Create a widget to display tracks
 			tracksList := widget.NewLabel(fmt.Sprintf(" %s\n\n", artistName))
 			for _, track := range tracks {
@@ -287,6 +281,11 @@ func PerformPostJsonRequest(w fyne.Window, artistName string) {
 		ctrlL := &desktop.CustomShortcut{KeyName: fyne.KeyL, Modifier: fyne.KeyModifierControl}
 		w.Canvas().AddShortcut(ctrlL, func(shortcut fyne.Shortcut) {
 			Favoris.SetChecked(!Favoris.Checked)
+		})
+
+		ctrlS := &desktop.CustomShortcut{KeyName: fyne.KeyS, Modifier: fyne.KeyModifierControl}
+		w.Canvas().AddShortcut(ctrlS, func(shortcut fyne.Shortcut) {
+			Music.SetChecked(!Music.Checked)
 		})
 
 		ctrlF := &desktop.CustomShortcut{KeyName: fyne.KeyF, Modifier: fyne.KeyModifierControl}

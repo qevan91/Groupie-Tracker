@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 
-	//"gpo/data"
 	"image/color"
 	"os"
 	"strings"
@@ -36,7 +35,7 @@ func Login(w fyne.Window) {
 	form.OnSubmit = func() {
 		username := entryUsername.Text
 		password := entryPassword.Text
-		ok, err := VerifyUser(username, password)
+		ok, err := VerifyUser(username, password, Favoris)
 		if err != nil {
 			label.Text = "Error: " + err.Error()
 			label.Refresh()
@@ -60,14 +59,14 @@ func Login(w fyne.Window) {
 	w.SetContent(logintcontent)
 }
 
-func CreateUser(Log string, Pass string) error {
+func CreateUser(Log string, Pass string, favlist []string) error {
 	file, err := os.OpenFile("users.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	userData := fmt.Sprintf("Username: %s, Password: %s\n", Log, Pass)
+	userData := fmt.Sprintf("Username: %s, Password: %s, favorite List: %s\n", Log, Pass, favlist)
 
 	_, err = file.WriteString(userData)
 	if err != nil {
@@ -87,8 +86,9 @@ func Signup(w fyne.Window, entryUsername *widget.Entry, entryPassword *widget.En
 	form.OnSubmit = func() {
 		username := entryUsername.Text
 		password := entryPassword.Text
+		favlist := GetFavoris()
 
-		exists, err := VerifyUser(username, password)
+		exists, err := VerifyUser(username, password, favlist)
 		if err != nil {
 			label.Text = "Error: " + err.Error()
 			label.Refresh()
@@ -100,7 +100,7 @@ func Signup(w fyne.Window, entryUsername *widget.Entry, entryPassword *widget.En
 			return
 		}
 
-		err = CreateUser(username, password)
+		err = CreateUser(username, password, favlist)
 		if err != nil {
 			label.Text = "Erreur lors de la création de l'utilisateur: " + err.Error()
 			label.Refresh()
@@ -113,7 +113,7 @@ func Signup(w fyne.Window, entryUsername *widget.Entry, entryPassword *widget.En
 	w.SetContent(container.NewVBox(form, label))
 }
 
-func VerifyUser(username string, password string) (bool, error) {
+func VerifyUser(username string, password string, favlist []string) (bool, error) {
 	file, err := os.Open("users.txt")
 	if err != nil {
 		return false, err
@@ -124,7 +124,16 @@ func VerifyUser(username string, password string) (bool, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "Username: "+username) && strings.Contains(line, "Password: "+password) {
-			return true, nil
+			allFavoritesPresent := true
+			for _, fav := range favlist {
+				if !strings.Contains(line, "favorite List: "+fav) {
+					allFavoritesPresent = false
+					break
+				}
+			}
+			if allFavoritesPresent {
+				return true, nil
+			}
 		}
 	}
 	return false, nil
